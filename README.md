@@ -1,9 +1,10 @@
 this is 302 group implementation of the THU-MIPS CPU
 ========================
 
-subtitle
+controllerDesignFiles
 --------------
-this is the content
+in this folder are the comtroller design file, sorry that I only have the wrriten version now
+
 
 
 subtitle2
