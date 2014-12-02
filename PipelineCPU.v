@@ -18,13 +18,135 @@ module PipelineCPU(
 	wire memRead;//
 	wire memToReg;
 	wire ALUOp;
-	wire MemWrite;
-	wire ALUSrc;
-	wire RegWrite;
+	wire memWrite;
+	wire ALUSrc1;
+	wire ALUSrc2;
+	wire regWrite;
+	
+	
+	//wires after PC
+	//5 wires
+	wire [15:0] PCValue;
+	wire [15:0] PCPlus;
+	wire [15:0] instruction_a_IM;
+	
+	wire [15:0] instruction_b_IFID;
+	wire [15:0] PC_b_IFID;
+	
+	//wires after IFID
+	wire [15:0] PC_a_IFID;
+	wire [15:0] instruction_a_IFID;
+
+	wire writeSpecReg_a_Decoder;
+	wire memToReg_a_Decoder;
+	wire regWrite_a_Decoder;
+	wire memRead_a_Decoder;
+	wire memWrite_a_Decoder;
+	wire jump_a_Decoder;
+	wire RxToMem_a_Decoder;
+	wire ALUOp_a_Decoder;
+	wire ALUSrc1_a_Decoder;
+	wire ALUSrc2_a_Decoder;
+	wire regDst_a_Decoder;
+	wire branch_a_Decoder;
+	wire readSpecReg_a_Decoder;
+	wire imSrcSelect;
+	
+	wire outData1AfterRegisters;
+	wire outData2AfterRegisters;
+	wire ExtendedImmediateAfterSE;
+
+	
+	
+	//wires after ID/EX
+	wire writeSpecReg_a_IDEX;
+	wire memToReg_a_IDEX;
+	wire regWrite_a_IDEX;
+	wire memRead_a_IDEX;
+	wire memWrite_a_IDEX;
+	wire jump_a_IDEX;
+	wire RxToMem_a_IDEX;
+	wire ALUOp_a_IDEX;
+	wire ALUSrc1_a_IDEX;
+	wire ALUSrc2_a_IDEX;
+	wire regDst_a_IDEX;
+	wire branch_a_IDEX;
+	wire readSpecReg_a_IDEX;
+	wire PC_a_IDEX;
+	wire outData1_a_IDEX;
+	wire outData2_a_IDEX;
+	wire ExtendedImmediate_a_IDEX;
+	wire RxAfter_a_IDEX;
+	wire RyAfter_a_IDEX;
+	wire RzAfter_a_IDEX;
+	
+	wire regWrite_b_EXMEM;
+	wire memWrite_b_EXMEM;
+	wire PC_b_EXMEM;
+	wire dataIn_b_EXMEM;
+	wire ALUResult_b_EXMEM;
+	wire TValue_b_EXMEM;
+	wire registerToWriteId_b_EXMEM;
+	
+	wire inData1_b_ALU;
+	wire inData2_b_ALU;
+	
+	//wires after EX/MEM
+	wire writeSpecReg_a_EXMEM;
+	wire memToReg_a_EXMEM;
+	wire regWrite_a_EXMEM;
+	wire memRead_a_EXMEM;
+	wire memWrite_a_EXMEM;
+	wire PC_a_EXMEM;
+	wire branch_a_EXMEM;
+	wire TValue_a_EXMEM;
+	wire ALUResult_a_EXMEM;
+	wire dataIn_a_EXMEM;
+	wire registerToWriteId_a_EXMEM;
+	//wires after MEM/WB
+	
+	wire c_WB_regWrite_a_Decoder;
+	wire c_WB_memtoReg_a_Decoder;
+	wire c_MEM_memRead_a_Decoder;
+	wire c_MEM_memWrite_a_Decoder;
+	wire c_MEM_branch_a_Decoder;
+	wire c_EX_ALUSrc_a_Decoder;
+	wire c_EX_ALUOp_a_Decoder;
+	wire c_EX_regDst_a_Decoder;
+	
+	
+	wire c_WB_regWrite_a_IDEX;
+	wire c_WB_memtoReg_a_IDEX;
+	wire c_MEM_memRead_a_IDEX;
+	wire c_MEM_memWrite_a_IDEX;
+	wire c_MEM_branch_a_IDEX;
+	wire c_EX_ALUSrc_a_IDEX;
+	wire c_EX_ALUOp_a_IDEX;
+	wire c_EX_regDst_a_IDEX;
+	
+	
+
+	
+	wire c_WB_regWrite_a_EXMEM;
+	wire c_WB_memtoReg_a_EXMEM;
+	wire c_MEM_memRead_a_EXMEM;
+	wire c_MEM_memWrite_a_EXMEM;
+	wire c_MEM_branch_a_EXMEM;
+	
+
+	wire registerToWriteIdAfterEXMEM;
+	
+	wire dataToWriteBack;
+	wire dataAfterMC;
+	
+	wire c_WB_regWrite_a_MEMWB;
+	wire c_WB_memtoReg_a_MEMWB;
+	wire dataAfterMEMWB;
+	wire ALUResultAfterMEMWB;
+	wire registerToWriteIdAfterMEMWB;
 	
 	//PC module
     reg [15:0] PC;
-	wire [15:0] PCValue;
 	assign PCValue[15:0] = PC[15:0];
 	
 	//Instruction_Memory module
@@ -37,7 +159,6 @@ module PipelineCPU(
         ); 
 	
 	//Add  1 to PC
-	wire [15:0] PCPlus;
 	assign PCPlus[15:0] = PCValue[15:0] + 16'b1;        //temp add 1;
 	
 	
@@ -53,15 +174,7 @@ module PipelineCPU(
 		.IF_ID_PCOut(PCAfterIFID),				//output
 		.IF_ID_instructionOut(instructionAfterIFID)  //output
 		);
-		
-		wire c_WB_regWrite_a_Decoder;
-		wire c_WB_memtoReg_a_Decoder;
-		wire c_MEM_memRead_a_Decoder;
-		wire c_MEM_memWrite_a_Decoder;
-		wire c_MEM_branch_a_Decoder;
-		wire c_EX_ALUSrc_a_Decoder;
-		wire c_EX_ALUOp_a_Decoder;
-		wire c_EX_regDst_a_Decoder;
+	
 		
 	//Instruction Decoder
 	InstructionDecoder id(
@@ -91,38 +204,17 @@ module PipelineCPU(
 		//input
 		);
 		
-	//reg [15:0] regs [7:0]
-	wire outData1AfterRegisters;
-	wire outData2AfterRegisters;
-	wire outData1AfterIDEX;
-	wire outData2AfterIDEX;
-	wire PCAfterIDEX;
-	
-	wire c_WB_regWrite_a_IDEX;
-	wire c_WB_memtoReg_a_IDEX;
-	wire c_MEM_memRead_a_IDEX;
-	wire c_MEM_memWrite_a_IDEX;
-	wire c_MEM_branch_a_IDEX;
-	wire c_EX_ALUSrc_a_IDEX;
-	wire c_EX_ALUOp_a_IDEX;
-	wire c_EX_regDst_a_IDEX;
-	
-	
-	wire ExtendedImmediateAfterSE;
+
 	SignExtender se(
-	//input
-	.CLK(CLK),
-	.RST(RST),
-	.imSrc(), //select which part of the instruction is immediate
-	.instruction(instructionAfterIFID),
-	//output
-	.ExtendedImmediateOut(ExtendedImmediateAfterSE)
+		//input
+		.CLK(CLK),
+		.RST(RST),
+		.imSrc(), //select which part of the instruction is immediate
+		.instruction(instructionAfterIFID),
+		//output
+		.ExtendedImmediateOut(ExtendedImmediateAfterSE)
 	);
 	
-	wire ExtendedImmediateAfterIDEX;
-	wire RxAfterIDEX;
-	wire RyAfterIDEX;
-	wire RzAfterIDEX;
 	//ID_EX
 	ID_EX id_ex(
 		.CLK(CLK),
@@ -160,16 +252,10 @@ module PipelineCPU(
 	
 	);
 	
-	
-	wire inData2BeforeALU;
 	//mux for ALUSrc
 	assign inData2BeforeALU = c_EX_ALUSrc_a_IDEX ?  ExtendedImmediateAfterIDEX : outData2AfterIDEX; 
 	//mux for rx, ry, rz
-	assign 
 	
-	
-	wire ALUResultBeforeEXMEM;
-	wire TValueBeforeEXMEM;
 	ALU alu(  //central alu
 	.CLK(CLK),
 	.RST(RST),
@@ -182,23 +268,10 @@ module PipelineCPU(
 	.T(TValueBeforeEXMEM)
 	);
 	
-	wire c_WB_regWrite_a_EXMEM;
-	wire c_WB_memtoReg_a_EXMEM;
-	wire c_MEM_memRead_a_EXMEM;
-	wire c_MEM_memWrite_a_EXMEM;
-	wire c_MEM_branch_a_EXMEM;
-
 	//branch ALU
-	wire branchDstBeforeEXMEM;
+	
 	assign branchDstBeforeEXMEM = ExtendedImmediateAfterIDEX + PCAfterIDEX;
-	wire branchDstAfterEXMEM;
 	
-	wire TValueAfterEXMEM;
-	wire ALUResultAfterEXMEM;
-	wire outData2AfterEXMEM;
-	
-	wire registerToWriteIdBeforeEXMEM;
-	wire registerToWriteIdAfterEXMEM;
 	EX_MEM ex_mem(
 		.CLK(CLK),
 		.RST(RST),
@@ -227,9 +300,6 @@ module PipelineCPU(
 		.outRegisterToWriteId(registerToWriteIdAfterEXMEM)
 	);
 	
-	wire dataToWriteBack;
-	wire dataAfterMC;
-	
 	MemoryController mc(
 		//mem control signal
 		.memRead(c_MEM_memRead_a_EXMEM),
@@ -252,12 +322,6 @@ module PipelineCPU(
 		.dataOut(dataAfterMC)
 	);
 	
-	
-	wire c_WB_regWrite_a_MEMWB;
-	wire c_WB_memtoReg_a_MEMWB;
-	wire dataAfterMEMWB;
-	wire ALUResultAfterMEMWB;
-	wire registerToWriteIdAfterMEMWB;
 	MEM_WB mem_wb(
 		//input
 		.c_WB_regWriteIn(c_WB_regWrite_a_EXMEM),
