@@ -1,3 +1,5 @@
+`timescale 1ns / 1ns
+
 module InstructionDecoder(
 	//rx express 10 to 8 bit in instruction, ry express 7 to 5 bit, rz express 4 to 2;
     input  [15:0] instruction,	
