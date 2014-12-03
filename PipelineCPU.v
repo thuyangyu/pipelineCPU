@@ -10,19 +10,8 @@ module PipelineCPU(
     //16 bit address bus
 	//16 bit 
 )
-	
-	//control signal defination
-	wire regDst;   //select write to ry or rz
-	wire jump;     //select PC or jump to immediate
-	wire branch; //
-	wire memRead;//
-	wire memToReg;
-	wire ALUOp;
-	wire memWrite;
-	wire ALUSrc1;
-	wire ALUSrc2;
-	wire regWrite;
-	
+	//wires before PC
+	wire [15:0] next_PC;
 	
 	//wires after PC
 	//1 + 2 + 2 wires
@@ -115,12 +104,12 @@ module PipelineCPU(
 	wire PC_a_EXMEM;
 	wire Zerobit_a_EXMEM;
 	wire ALUResult_a_EXMEM;
-	wire dataIn_a_EXMEM;
+	wire data_a_EXMEM;
 	wire registerToWriteId_a_EXMEM;
 	
 	wire PCSrc;
 	
-	wire dataOut_a_MemController;
+	wire data_a_MemController;
 	
 	//wires after MEM/WB
 	//3 + 3 + 1 wires
@@ -295,39 +284,43 @@ module PipelineCPU(
 	
 	
 	
-	//modules in EX/MEM
+	//modules in EX/MEM stage
 	//EX_MEM
 	EX_MEM ex_mem(
 		.CLK(CLK),
 		//input
-		.c_WB_regWriteIn(c_WB_regWrite_a_IDEX),
-		.c_WB_memtoRegIn(c_WB_memtoReg_a_IDEX),
-		.c_MEM_memReadIn(c_MEM_memRead_a_IDEX),
-		.c_MEM_memWriteIn(c_MEM_memWrite_a_IDEX),
-		.c_MEM_branchIn(c_MEM_branch_a_IDEX),
-		.branchDstIn(branchDstBeforeEXMEM),
-		.TValueIn(TValueBeforeEXMEM),
-		.ALUResultIn(ALUResultBeforeEXMEM),
-		.inData2(outData2AfterIDEX),
-		.inRegisterToWriteId(registerToWriteIdBeforeEXMEM),
+		.writeSpecRegIn(writeSpecReg_a_IDEX)
+		.memtoRegIn(memtoReg_a_IDEX),
+		.regWriteIn(regWrite_a_IDEX),
+		.memReadIn(memRead_a_IDEX),
+		.memWriteIn(memWrite_a_IDEX),
+		.branchIn(branch_a_IDEX),
+		.PCIn(PC_b_EXMEM),
+		
+		.ZerobitIn(Zerobit_b_EXMEM),
+		.ALUResultIn(ALUResult_b_EXMEM),
+		.dataIn(data_b_EXMEM),
+		.registerToWriteIdIn(registerToWriteId_b_EXMEM),
 		
 		//output
-		.c_WB_regWriteOut(      	c_WB_regWrite_a_EXMEM),
-		.c_WB_memtoRegOut(  	c_WB_memtoReg_a_EXMEM),
-		.c_MEM_memReadOut( 	c_MEM_memRead_a_EXMEM),
-		.c_MEM_memWriteOut(	c_MEM_memWrite_a_EXMEM),
-		.c_MEM_branchOut(       	c_MEM_branch_a_EXMEM ),
-		.branchDstOut(branchDstAfterEXMEM),
-		.TValueOut(TValueAfterEXMEM),
-		.ALUResultOut(ALUResultAfterEXMEM),
-		.outData2(outData2AfterEXMEM),
-		.outRegisterToWriteId(registerToWriteIdAfterEXMEM)
+		.writeSpecRegOut(writeSpecReg_a_EXMEM),
+		.memtoRegOut(  	memtoReg_a_EXMEM),
+		.regWriteOut(      	regWrite_a_EXMEM),
+		.memReadOut( 	    memRead_a_EXMEM),
+		.memWriteOut(	    memWrite_a_EXMEM),
+		.branchOut(       	    branch_a_EXMEM ),
+		.PCOut( PC_a_EXMEM),
+		
+		.ALUResultOut(ALUResult_a_EXMEM),
+		.ZerobitOut(Zerobit_a_EXMEM),
+		.dataOut(data_a_EXMEM),
+		.registerToWriteId(registerToWriteId_a_EXMEM)
 	);
 	
 	MemoryController mc(
 		//mem control signal
-		.memRead(c_MEM_memRead_a_EXMEM),
-		.memWrite(c_MEM_memWrite_a_EXMEM),
+		.memRead(memRead_a_EXMEM),
+		.memWrite(memWrite_a_EXMEM),
 		//physical connection
 		.ram1OE(ram1OE),
 		.ram1WE(ram1WE),
@@ -339,26 +332,54 @@ module PipelineCPU(
 		.CLK(CLK),
 		.RST(RST),
 		
-		.address(ALUResultAfterEXMEM),
-		.dataIn(outData2AfterEXMEM),
+		.address(ALUResult_a_EXMEM),
+		.dataIn(data_a_EXMEM),
 		
 		//output
-		.dataOut(dataAfterMC)
+		.dataOut(data_a_MemController)
 	);
 	
+	//modules in MEM/WB stage
+	//MEM_WB
 	MEM_WB mem_wb(
 		//input
-		.c_WB_regWriteIn(c_WB_regWrite_a_EXMEM),
-		.c_WB_memtoRegIn(c_WB_memtoReg_a_EXMEM),
-		.dataIn(dataAfterMC),
-		.ALUResultIn(ALUResultAfterEXMEM),
-		.inRegisterToWriteId(registerToWriteIdAfterEXMEM)
+		.writeSpecRegIn(writeSpecReg_a_EXMEM),
+		.memtoRegIn(memtoReg_a_EXMEM),
+		.regWriteIn(regWrite_a_EXMEM),
+		.dataIn(data_a_MemController),
+		.ALUResultIn(ALUResult_a_EXMEM),
+		.registerToWriteIdIn(registerToWriteId_a_EXMEM),
 		//output
-		.c_WB_regWriteOut(      	c_WB_regWrite_a_MEMWB),
-		.c_WB_memtoRegOut(  	c_WB_memtoReg_a_MEMWB),
-		.dataOut(dataAfterMEMWB),
-		.ALUResultOut(ALUResultAfterMEMWB),
-		.outRegisterToWriteId(registerToWriteIdAfterMEMWB)
+		.writeSpecRegOut(writeSpecReg_a_MEMWB),
+		.memtoRegOut(  	memtoReg_a_MEMWB),
+		.regWriteOut(      	regWrite_a_MEMWB),
+		.dataOut(data_a_MEMWB),
+		.ALUResultOut(ALUResult_a_MEMWB),
+		.outRegisterToWriteId(registerToWriteId_a_MEMWB)
 	);
+	
+	assign dataToWriteBack = memToReg_a_MEMWB ? data_a_MEMWB : ALUResult_a_MEMWB;
+	
+	ForwardUnit  fu1(
+	//input
+    .Rx_a_IDEX(Rx_a_IDEX),
+    .Ry_a_IDEX(Ry_a_IDEX),
+    .Rz_a_IDEX(Rz_a_IDEX),
+    .regWrite_a_EXMEM(regWrite_a_EXMEM),
+    .regWrite_a_MEMWB(regWrite_a_MEMWB),
+    .registerToWriteId_a_EXMEM(registerToWriteId_a_EXMEM),
+    .registerToWriteId_a_MEMWB(registerToWriteId_a_MEMWB),
+    .writeSpecReg_a_EXMEM(writeSpecReg_a_EXMEM),
+    .writeSpecReg_a_MEMWB(.writeSpecReg_a_MEMWB),
+    .readSpecReg_a_IDEX(readSpecReg_a_IDEX),
+	
+	//output
+    .forward1(forward1),
+    .forward2(forward2)
+	);
+
+	assign next_PC = PCWrite ? PCValue : (jump_a_IDEX ? outData1Decided : (PCSrc ? PC_a_EXMEM : PCPlus))
+	always @ (posedge CLK)
+		PC <= next_PC;
 	
 endmodule
