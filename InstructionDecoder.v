@@ -19,6 +19,7 @@ module InstructionDecoder(
     );
     
 always @(instruction)
+begin
 
 case(instruction[15:11])
     5'b00001:  
@@ -612,11 +613,10 @@ case(instruction[15:11])
                 ALUSrc1 = 2b'00;
                 rxToMem = 1b'0;
             end
-        endcase
-        
+        endcase       
         
 endcase    
-    
+end  
     
 
 endmodule
