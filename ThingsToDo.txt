@@ -1,2 +1,1 @@
-1, the pc should be an register trigger by clk
 2, there should be two clk
