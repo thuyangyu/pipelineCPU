@@ -11,7 +11,7 @@ module ALU(
 
 assign zeroFlag = (result[15:0] == 16'b0)? 1'b1: 1'b0;
 
-always @(first,second,op)
+always @(first or second or op)
 begin
     case(op):
 
