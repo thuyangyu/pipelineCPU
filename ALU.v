@@ -2,8 +2,6 @@
 
 
 module ALU(
-    input CLK,   
-    input RST,	 
     input [15:0] first,
     input [15:0] second,
     input [3:0] op;
