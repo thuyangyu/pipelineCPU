@@ -35,7 +35,7 @@ module PipelineCPU(
 	wire [15:0] PC_b_IFID;
 	
 	//wires after IFID
-	//2+3+14+3 wires
+	//2+3+14+2+3 wires
 	wire [15:0] PC_a_IFID;
 	wire [15:0] instruction_a_IFID;
 
@@ -58,13 +58,16 @@ module PipelineCPU(
 	wire readSpecReg_a_Decoder;
 	wire imSrcSelect;
 	
+	wire memWrite_b_IDEX;
+	wire regWrite_b_IDEX;
+	
 	wire outData1_a_Registers;
 	wire outData2_a_Registers;
 	wire ExtendedImmediate_a_SE;
 
 
 	//wires after ID/EX
-	//13 + 7 + 2 + 7
+	//13 + 7 + 2 + 2 + 7
 	wire writeSpecReg_a_IDEX;
 	wire memToReg_a_IDEX;
 	wire regWrite_a_IDEX;
@@ -87,13 +90,15 @@ module PipelineCPU(
 	wire Ry_a_IDEX;
 	wire Rz_a_IDEX;
 	
-	wire inData1_b_ALU;
-	wire inData2_b_ALU;
+	wire outData1Decided;
+	wire outData2Decided;
+	wire Data1_b_ALU;
+	wire Data2_b_ALU;
 	
 	wire regWrite_b_EXMEM;
 	wire memWrite_b_EXMEM;
 	wire PC_b_EXMEM;
-	wire dataIn_b_EXMEM;
+	wire data_b_EXMEM;
 	wire ALUResult_b_EXMEM;
 	wire Zerobit_b_EXMEM;
 	wire registerToWriteId_b_EXMEM;
@@ -146,44 +151,65 @@ module PipelineCPU(
         .instruction(instruction_a_IM)
         ); 
 	
-	//modules in IFID
-	
+	//modules in IFID stage
 	//IF_ID
 	IF_ID if_id(
 		.CLK(CLK),
-        .RST(RST),
-		.IF_ID_PCIn(PCPlus), 					//input
-		.IF_ID_instructionIn(instruction),    //input
-		.IF_ID_PCOut(PCAfterIFID),				//output
-		.IF_ID_instructionOut(instructionAfterIFID)  //output
+		.PCIn(PC_b_IFID), 									//input
+		.instructionIn(instruction_b_IFID),      //input
+		.PCOut(PC_a_IFID),			   				   //output
+		.instructionOut(instruction_a_IFID)   //output
 		);
 	
-		
+	//HazardDetector
+	module HazardDetector(
+    .HD_instruction(instruction_a_IFID),
+    .HD_memRead_a_IDEX(memRead_a_IDEX),
+    .HD_Rx_a_IDEX(Rx_a_IDEX),
+    .HD_Ry_a_IDEX(Ry_a_IDEX),
+    .HD_PCWrite(PCWrite),
+    .HD_IFIDWrite(IFIDWrite),
+    .HD_addBubble(addBubble)
+    );
+    
 	//Instruction Decoder
 	InstructionDecoder id(
-		instruction(instructionAfterIFID),
-		regDst(regDst),   //select write R3 from ry or rz;   0 is from ry, 1 is from rz;
-		jump(jump),  		//select PC or jump to immediate
-		branch(branch),
-		memRead(memRead),
-		memToReg(memToReg),
-		ALUOp(ALUOp),
-		memWrite(memWrite),
-		ALUSrc(ALUSrc),
-		regWrite(regWrite)
-	);
+	//rx express 10 to 8 bit in instruction, ry express 7 to 5 bit, rz express 4 to 2;
+	//1 + 14   
+    .instruction(instruction_a_IFID),	
+	
+	//insert muxs before two signal
+    .imSelector(imSrcSelect),
+    .ALUSrc2(ALUSrc2_a_Decoder),
+    .memWrite(memWrite_a_Decoder),   //mux inserted
+    .memRead(memRead_a_Decoder),
+    .regDst(regDst_a_Decoder),   
+	.branch(branch_a_Decoder), 
+	.regWrite(regWrite_a_Decoder),    //mux inserted
+	.memToReg(memToReg_a_Decoder),
+	.op(ALUOp_a_Decoder),
+	.readSpecReg(readSpecReg_a_Decoder),
+	.writeSpecReg(writeSpecReg_a_Decoder),
+	.jump(jump_a_Decoder),     
+	.ALUSrc1(ALUSrc1_a_Decoder),
+	.rxToMem(RxToMem_a_Decoder)
+    );
+	
+	assign memWrite_b_IDEX = (jump_a_IDEX || addBubble || PCSrc) ? 2'b0 : memWrite_a_Decoder;
+	assign regWrite_b_IDEX = (jump_a_IDEX || addBubble || PCSrc) ? 1'b0 : regWrite_a_Decoder;
 	
 	//Registers
 	Registers registers(
-		.RegWrite(RegWrite),   //RegWrite == 1 express write, == 0 express read;
 		.CLK(CLK),
-		.RST(RST),
-		.R1(instructionAfterIFID[10:8]),
-		.R2(instructionAfterIFID[7:5]),
-		.R3(),
-		.inData3(),
-		.outData1(outData1AfterRegisters),
-		.outData2(outData2AfterRegisters)
+		.regWrite(regWrite_a_MEMWB),   //RegWrite == 1 express write, == 0 express read;
+		.writeSpecReg(writeSpecReg_a_MEMWB),
+		.readSpecReg(readSpecReg_a_Decoder),
+		.R1(instruction_a_IFID[10:8]),
+		.R2(instruction_a_IFID[7:5]),
+		.R3(instruction_a_IFID[4:2]),
+		.inData3(dataToWriteBack),
+		.outData1(outData1_a_Registers),
+		.outData2(outData2_a_Registers)
 		//input
 		);
 		
@@ -191,73 +217,88 @@ module PipelineCPU(
 	SignExtender se(
 		//input
 		.CLK(CLK),
-		.RST(RST),
-		.imSrc(), //select which part of the instruction is immediate
-		.instruction(instructionAfterIFID),
+		.imSrcSelect(imSrcSelect), //select which part of the instruction is immediate
+		.instruction(instruction_a_IFID),
 		//output
-		.ExtendedImmediateOut(ExtendedImmediateAfterSE)
+		.ExtendedImmediateOut(ExtendedImmediate_a_SE)
 	);
 	
+	//modules in ID/EX stage
 	//ID_EX
 	ID_EX id_ex(
 		.CLK(CLK),
-		.RST(RST),
-		.ID_EX_PCIn(PCAfterIFID), 					//input
-		.inData1(outData1AfterRegisters),    //input
-		.inData2(outData2AfterRegisters),
+		.PCIn(PC_a_IFID), 					//input
+		.inData1(outData1_a_Registers),    //input
+		.inData2(outData2_a_Registers),
 		.inRx(instructionAfterIFID[10:8]),
 		.inRy(instructionAfterIFID[7:5]),
 		.inRz(instructionAfterIFID[4:2]),
-		.inExtendedImmediate(ExtendedImmediateAfterSE),
-		.c_WB_regWriteIn(c_WB_regWrite_a_Decoder),
-		.c_WB_memtoRegIn(c_WB_memtoReg_a_Decoder),
-		.c_MEM_memReadIn(c_MEM_memRead_a_Decoder),
-		.c_MEM_memWriteIn(c_MEM_memWrite_a_Decoder),
-		.c_MEM_branchIn(c_MEM_branch_a_Decoder),
-		.c_EX_ALUOpIn(c_EX_ALUOp_a_Decoder),
-		.c_EX_ALUSrcIn(c_EX_ALUSrc_a_Decoder),
-		.c_EX_regDstIn(c_EX_regDst_a_Decoder),
-		.c_WB_regWriteOut(      	c_WB_regWrite_a_IDEX),
-		.c_WB_memtoRegOut(  	c_WB_memtoReg_a_IDEX),
-		.c_MEM_memReadOut( 	c_MEM_memRead_a_IDEX),
-		.c_MEM_memWriteOut(	c_MEM_memWrite_a_IDEX),
-		.c_MEM_branchOut(       	c_MEM_branch_a_IDEX ),
-		.c_EX_ALUOpOut(           	c_EX_ALUOp_a_IDEX ),
-		.c_EX_ALUSrcOut(           	c_EX_ALUSrc_a_IDEX ),
-		.c_EX_regDstOut(            	c_EX_regDst_a_IDEX ),
-		.ID_EX_PCOut(PCAfterIDEX),				//output
-		.outData1(outData1AfterIDEX),
-		.outData2(outData2AfterIDEX),
-		.outExtendedImmediate(ExtendedImmediateAfterIDEX),
-		.outRx(RxAfterIDEX),
-		.outRy(RyAfterIDEX),
-		.outRz(RzAfterIDEX)
-	
+		.inExtendedImmediate(ExtendedImmediate_a_SE),
+		
+		.writeSpecRegIn(writeSpecReg_a_Decoder),
+		.memtoRegIn(memtoReg_a_Decoder),
+		.regWriteIn(regWrite_b_IDEX),  //mux before it
+		.memReadIn(memRead_a_Decoder),
+		.memWriteIn(memWrite_b_IDEX),  //mux before it
+		.jumpIn(jump_a_Decoder),
+		.RxToMemIn(RxToMem_a_Decoder),
+		.ALUOpIn(ALUOp_a_Decoder),
+		.ALUSrc1In(ALUSrc1_a_Decoder),
+		.ALUSrc2In(ALUSrc2_a_Decoder)
+		.regDstIn(regDst_a_Decoder),
+		.branchIn(branch_a_Decoder),
+		.readSpecRegIn(readSpecReg_a_Decoder),
+		
+		.writeSpecRegOut(writeSpecReg_a_IDEX),
+		.memtoRegOut(  	memtoReg_a_IDEX),
+		.regWriteOut(      	regWrite_a_IDEX),
+		.memReadOut( 		memRead_a_IDEX),
+		.memWriteOut(		memWrite_a_IDEX),
+		.jumpOut(				jump_a_IDEX),
+		RxToMemOut(      RxToMem_a_IDEX),
+		.ALUOpOut(           ALUOp_a_IDEX ),
+		.ALUSrc1Out(           ALUSrc1_a_IDEX ),
+		.ALUSrc2Out(           ALUSrc2_a_IDEX ),
+		.regDstOut(            regDst_a_IDEX ),
+		.branchOut(       		branch_a_IDEX ),
+		.readSpecRegOut(  readSpecReg_a_IDEX),
+		
+		.PCOut(PCAfterIDEX),				//output
+		.outData1(outData1_a_IDEX),
+		.outData2(outData2_a_IDEX),
+		.outExtendedImmediate(ExtendedImmediate_a_IDEX),
+		.outRx(Rx_a_IDEX),
+		.outRy(Ry_a_IDEX),
+		.outRz(Rz_a_IDEX)
 	);
 	
-	//mux for ALUSrc
-	assign inData2BeforeALU = c_EX_ALUSrc_a_IDEX ?  ExtendedImmediateAfterIDEX : outData2AfterIDEX; 
-	//mux for rx, ry, rz
+	assign regWrite_b_EXMEM = PCSrc ? 1'b0 : regWrite_a_IDEX;
+	assign memWrite_b_EXMEM = PCSrc ? 1'b0 : memWrite_a_IDEX;
+	assign PC_b_EXMEM = PC_a_IDEX + ExtendedImmediate_a_IDEX;
+	assign outData1Decided = forward1[1] ? dataToWriteBack : (forward1[0] ? ALUResult_a_EXMEM : outData1_a_IDEX);
+	assign outData2Decided = forward2[1] ? dataToWriteBack : (forward2[0] ? ALUResult_a_EXMEM : outData2_a_IDEX);
+	assign Data1_b_ALU = ALUSrc1[1] ? outData2Decided : (ALUSrc1[0] ? PC_a_IDEX : outData1Decided);
+	assign Data2_b_ALU = ALUSrc2[1] ? outData1Decided : (ALUSrc2[0] ? ExtendedImmediate_a_IDEX : outData2_a_IDEX);
+	assign data_b_EXMEM = RxToMem_a_IDEX ? outData1Decided : outData2Decided;
+	assign registerToWriteId_b_EXMEM = regDst[1] ? Rz_a_IDEX : (regDst[0] ? Ry_a_IDEX : Rx_a_IDEX);
+	
 	
 	ALU alu(  //central alu
-	.CLK(CLK),
-	.RST(RST),
 	//input
-	.first(outData1AfterIDEX),
-	.second(outData2AfterIDEX),
-	.op(c_EX_ALUOp_a_IDEX),
+	.first(Data1_b_ALU),
+	.second(Data2_b_ALU),
+	.op(ALUOp_a_IDEX),
 	//output
-	.result(ALUResultBeforeEXMEM),
-	.T(TValueBeforeEXMEM)
+	.result(ALUResult_b_EXMEM),
+	.zeroFlag(Zerobit_b_EXMEM)
 	);
 	
-	//branch ALU
 	
-	assign branchDstBeforeEXMEM = ExtendedImmediateAfterIDEX + PCAfterIDEX;
 	
+	//modules in EX/MEM
+	//EX_MEM
 	EX_MEM ex_mem(
 		.CLK(CLK),
-		.RST(RST),
 		//input
 		.c_WB_regWriteIn(c_WB_regWrite_a_IDEX),
 		.c_WB_memtoRegIn(c_WB_memtoReg_a_IDEX),
