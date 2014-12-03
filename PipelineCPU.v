@@ -32,80 +32,80 @@ module PipelineCPU(
 	wire IFIDWrite;
 	wire addBubble;
 	
-	wire writeSpecReg_a_Decoder;
+	wire [1:0] writeSpecReg_a_Decoder;
 	wire memToReg_a_Decoder;
 	wire regWrite_a_Decoder;
-	wire memRead_a_Decoder;
-	wire memWrite_a_Decoder;
+	wire [1:0] memRead_a_Decoder;
+	wire [1:0] memWrite_a_Decoder;
 	wire jump_a_Decoder;
 	wire RxToMem_a_Decoder;
-	wire ALUOp_a_Decoder;
-	wire ALUSrc1_a_Decoder;
-	wire ALUSrc2_a_Decoder;
-	wire regDst_a_Decoder;
+	wire [3:0] ALUOp_a_Decoder;
+	wire [1:0] ALUSrc1_a_Decoder;
+	wire [1:0] ALUSrc2_a_Decoder;
+	wire [1:0] regDst_a_Decoder;
 	wire branch_a_Decoder;
-	wire readSpecReg_a_Decoder;
-	wire imSrcSelect;
+	wire [1:0] readSpecReg_a_Decoder;
+	wire [3:0] imSrcSelect;
 	
-	wire memWrite_b_IDEX;
+	wire [1:0] memWrite_b_IDEX;
 	wire regWrite_b_IDEX;
 	
-	wire outData1_a_Registers;
-	wire outData2_a_Registers;
-	wire ExtendedImmediate_a_SE;
+	wire [15:0] outData1_a_Registers;
+	wire [15:0] outData2_a_Registers;
+	wire [15:0] ExtendedImmediate_a_SE;
 
 
 	//wires after ID/EX
 	//13 + 7 + 2 + 2 + 7
-	wire writeSpecReg_a_IDEX;
+	wire [1:0] writeSpecReg_a_IDEX;
 	wire memToReg_a_IDEX;
 	wire regWrite_a_IDEX;
-	wire memRead_a_IDEX;
-	wire memWrite_a_IDEX;
+	wire [1:0] memRead_a_IDEX;
+	wire [1:0] memWrite_a_IDEX;
 	wire jump_a_IDEX;
 	wire RxToMem_a_IDEX;
-	wire ALUOp_a_IDEX;
-	wire ALUSrc1_a_IDEX;
-	wire ALUSrc2_a_IDEX;
-	wire regDst_a_IDEX;
+	wire [3:0] ALUOp_a_IDEX;
+	wire [1:0] ALUSrc1_a_IDEX;
+	wire [1:0] ALUSrc2_a_IDEX;
+	wire [1:0] regDst_a_IDEX;
 	wire branch_a_IDEX;
-	wire readSpecReg_a_IDEX;
+	wire [1:0] readSpecReg_a_IDEX;
 	
-	wire PC_a_IDEX;
-	wire outData1_a_IDEX;
-	wire outData2_a_IDEX;
-	wire ExtendedImmediate_a_IDEX;
-	wire Rx_a_IDEX;
-	wire Ry_a_IDEX;
-	wire Rz_a_IDEX;
+	wire [15:0] PC_a_IDEX;
+	wire [15:0] outData1_a_IDEX;
+	wire [15:0] outData2_a_IDEX;
+	wire [15:0] ExtendedImmediate_a_IDEX;
+	wire [2:0] Rx_a_IDEX;
+	wire [2:0] Ry_a_IDEX;
+	wire [2:0] Rz_a_IDEX;
 	
-	wire outData1Decided;
-	wire outData2Decided;
-	wire Data1_b_ALU;
-	wire Data2_b_ALU;
+	wire [15:0] outData1Decided;
+	wire [15:0] outData2Decided;
+	wire [15:0] Data1_b_ALU;
+	wire [15:0] Data2_b_ALU;
 	
 	wire regWrite_b_EXMEM;
-	wire memWrite_b_EXMEM;
-	wire PC_b_EXMEM;
-	wire data_b_EXMEM;
-	wire ALUResult_b_EXMEM;
-	wire Zerobit_b_EXMEM;
-	wire registerToWriteId_b_EXMEM;
+	wire [1:0] memWrite_b_EXMEM;
+	wire [15:0] PC_b_EXMEM;
+	wire [15:0] data_b_EXMEM;
+	wire [15:0] ALUResult_b_EXMEM;
+	wire zerobit_b_EXMEM;
+	wire [2:0] registerToWriteId_b_EXMEM;
 	
 	//wires after EX/MEM
 	//5 + 6 + 1 + 1 wires
-	wire writeSpecReg_a_EXMEM;
+	wire [1:0] writeSpecReg_a_EXMEM;
 	wire memToReg_a_EXMEM;
 	wire regWrite_a_EXMEM;
-	wire memRead_a_EXMEM;
-	wire memWrite_a_EXMEM;
+	wire [1:0] memRead_a_EXMEM;
+	wire [1:0] memWrite_a_EXMEM;
 	
 	wire branch_a_EXMEM;
-	wire PC_a_EXMEM;
-	wire Zerobit_a_EXMEM;
-	wire ALUResult_a_EXMEM;
-	wire data_a_EXMEM;
-	wire registerToWriteId_a_EXMEM;
+	wire [15:0] PC_a_EXMEM;
+	wire zerobit_a_EXMEM;
+	wire [15:0] ALUResult_a_EXMEM;
+	wire [15:0] data_a_EXMEM;
+	wire [2:0] registerToWriteId_a_EXMEM;
 	
 	wire PCSrc;
 	
@@ -113,15 +113,15 @@ module PipelineCPU(
 	
 	//wires after MEM/WB
 	//3 + 3 + 1 wires
-	wire writeSpecReg_a_MEMWB;
+	wire [1:0] writeSpecReg_a_MEMWB;
 	wire memToReg_a_MEMWB;
 	wire regWrite_a_MEMWB;
 	
-	wire dataOut_a_MEMWB;
-	wire ALUResult_a_MEMWB;
-	wire registerToWriteId_a_MEMWB;
+	wire [15:0] dataOut_a_MEMWB;
+	wire [15:0] ALUResult_a_MEMWB;
+	wire [3:0] registerToWriteId_a_MEMWB;
 	
-	wire dataToWriteBack;
+	wire [15:0] dataToWriteBack;
 
 	//************************************* start attachment
 	
@@ -132,6 +132,7 @@ module PipelineCPU(
 	assign PCPlus[15:0] = PCValue[15:0] + 16'b1;        //temp add 1;
 	assign PC_b_IFID[15:0]               = IFIDWrite ? PC_a_IFID[15:0] : PCPlus[15:0];  //mux
 	assign instruction_b_IFID[15:0] = IFIDWrite ? instruction_a_IFID[15:0] : ((jump || PCSrc) ? 16b0000_1000_0000_0000 : instruction_a_IM[15:0]);
+	
 	//Instruction_Memory module
     Instruction_Memory im(
         .CLK(CLK),
@@ -167,7 +168,7 @@ module PipelineCPU(
 	//1 + 14   
     .instruction(instruction_a_IFID),	
 	
-	//insert muxs before two signal
+	//insert muxes before two signal
     .imSelector(imSrcSelect),
     .ALUSrc2(ALUSrc2_a_Decoder),
     .memWrite(memWrite_a_Decoder),   //mux inserted
@@ -219,9 +220,9 @@ module PipelineCPU(
 		.PCIn(PC_a_IFID), 					//input
 		.inData1(outData1_a_Registers),    //input
 		.inData2(outData2_a_Registers),
-		.inRx(instructionAfterIFID[10:8]),
-		.inRy(instructionAfterIFID[7:5]),
-		.inRz(instructionAfterIFID[4:2]),
+		.inRx(instruction_a_IFID[10:8]),
+		.inRy(instruction_a_IFID[7:5]),
+		.inRz(instruction_a_IFID[4:2]),
 		.inExtendedImmediate(ExtendedImmediate_a_SE),
 		
 		.writeSpecRegIn(writeSpecReg_a_Decoder),
@@ -252,7 +253,7 @@ module PipelineCPU(
 		.branchOut(       		branch_a_IDEX ),
 		.readSpecRegOut(  readSpecReg_a_IDEX),
 		
-		.PCOut(PCAfterIDEX),				//output
+		.PCOut(PC_a_IDEX),				//output
 		.outData1(outData1_a_IDEX),
 		.outData2(outData2_a_IDEX),
 		.outExtendedImmediate(ExtendedImmediate_a_IDEX),
@@ -262,12 +263,12 @@ module PipelineCPU(
 	);
 	
 	assign regWrite_b_EXMEM = PCSrc ? 1'b0 : regWrite_a_IDEX;
-	assign memWrite_b_EXMEM = PCSrc ? 1'b0 : memWrite_a_IDEX;
+	assign memWrite_b_EXMEM = PCSrc ? 2'b0 : memWrite_a_IDEX;
 	assign PC_b_EXMEM = PC_a_IDEX + ExtendedImmediate_a_IDEX;
 	assign outData1Decided = forward1[1] ? dataToWriteBack : (forward1[0] ? ALUResult_a_EXMEM : outData1_a_IDEX);
 	assign outData2Decided = forward2[1] ? dataToWriteBack : (forward2[0] ? ALUResult_a_EXMEM : outData2_a_IDEX);
 	assign Data1_b_ALU = ALUSrc1[1] ? outData2Decided : (ALUSrc1[0] ? PC_a_IDEX : outData1Decided);
-	assign Data2_b_ALU = ALUSrc2[1] ? outData1Decided : (ALUSrc2[0] ? ExtendedImmediate_a_IDEX : outData2_a_IDEX);
+	assign Data2_b_ALU = ALUSrc2[1] ? outData1Decided : (ALUSrc2[0] ? ExtendedImmediate_a_IDEX : outData2Decided);
 	assign data_b_EXMEM = RxToMem_a_IDEX ? outData1Decided : outData2Decided;
 	assign registerToWriteId_b_EXMEM = regDst[1] ? Rz_a_IDEX : (regDst[0] ? Ry_a_IDEX : Rx_a_IDEX);
 	
@@ -279,7 +280,7 @@ module PipelineCPU(
 	.op(ALUOp_a_IDEX),
 	//output
 	.result(ALUResult_b_EXMEM),
-	.zeroFlag(Zerobit_b_EXMEM)
+	.zeroFlag(zerobit_b_EXMEM)
 	);
 	
 	
@@ -297,7 +298,7 @@ module PipelineCPU(
 		.branchIn(branch_a_IDEX),
 		.PCIn(PC_b_EXMEM),
 		
-		.ZerobitIn(Zerobit_b_EXMEM),
+		.zerobitIn(zerobit_b_EXMEM),
 		.ALUResultIn(ALUResult_b_EXMEM),
 		.dataIn(data_b_EXMEM),
 		.registerToWriteIdIn(registerToWriteId_b_EXMEM),
@@ -312,10 +313,12 @@ module PipelineCPU(
 		.PCOut( PC_a_EXMEM),
 		
 		.ALUResultOut(ALUResult_a_EXMEM),
-		.ZerobitOut(Zerobit_a_EXMEM),
+		.zerobitOut(zerobit_a_EXMEM),
 		.dataOut(data_a_EXMEM),
 		.registerToWriteId(registerToWriteId_a_EXMEM)
 	);
+	
+	assign PCSrc = branch_a_EXMEM && zerobit_a_EXMEM;
 	
 	MemoryController mc(
 		//mem control signal
@@ -370,7 +373,7 @@ module PipelineCPU(
     .registerToWriteId_a_EXMEM(registerToWriteId_a_EXMEM),
     .registerToWriteId_a_MEMWB(registerToWriteId_a_MEMWB),
     .writeSpecReg_a_EXMEM(writeSpecReg_a_EXMEM),
-    .writeSpecReg_a_MEMWB(.writeSpecReg_a_MEMWB),
+    .writeSpecReg_a_MEMWB(writeSpecReg_a_MEMWB),
     .readSpecReg_a_IDEX(readSpecReg_a_IDEX),
 	
 	//output
