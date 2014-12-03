@@ -1,49 +1,49 @@
 //ID_EX
 module ID_EX (
 		input CLK,
-		input PCIn, 								//input
-		input inData1,    						//input
-		input inData2,
-		input inRx,
-		input inRy,
-		input inRz,
-		input inExtendedImmediate,
+		input [15:0] PCIn, 								//input
+		input [15:0] inData1,    						//input
+		input [15:0] inData2,
+		input [2:0] inRx,
+		input [2:0] inRy,
+		input [2:0] inRz,
+		input [15:0] inExtendedImmediate,
 		
-		input writeSpecRegIn,
+		input [1:0]writeSpecRegIn,
 		input memtoRegIn,
 		input regWriteIn, 
-		input memReadIn,
-		input memWriteIn,  //mux before it
+		input [1:0] memReadIn,
+		input [1:0] memWriteIn,  //mux before it
 		input jumpIn,
 		input RxToMemIn,
-		input ALUOpIn,
-		input ALUSrc1In,
-		input ALUSrc2In,
-		input regDstIn,
+		input [3:0] ALUOpIn,
+		input [1:0] ALUSrc1In,
+		input [1:0] ALUSrc2In,
+		input [1:0] regDstIn,
 		input branchIn,
-		input readSpecRegIn,
+		input [1:0] readSpecRegIn,
 		
-		output reg writeSpecRegOut,
+		output reg [1:0] writeSpecRegOut,
 		output reg memtoRegOut,
 		output reg regWriteOut,
-		output reg memReadOut,
-		output reg memWriteOut,
+		output reg [1:0] memReadOut,
+		output reg [1:0] memWriteOut,
 		output reg jumpOut,
 		output reg RxToMemOut,
-		output reg ALUOpOut,
-		output reg ALUSrc1Out,
-		output reg ALUSrc2Out,
-		output reg regDstOut,
+		output reg [3:0] ALUOpOut,
+		output reg [1:0] ALUSrc1Out,
+		output reg [1:0] ALUSrc2Out,
+		output reg [1:0] regDstOut,
 		output reg branchOut,
-		output reg readSpecRegOut,
+		output reg [1:0]readSpecRegOut,
 		
-		output reg PCOut,				//output
-		output reg outData1,
-		output reg outData2,
-		output reg outExtendedImmediate,
-		output reg outRx,
-		output reg outRy,
-		output reg outRz
+		output reg [15:0] PCOut,				//output
+		output reg [15:0] outData1,
+		output reg [15:0] outData2,
+		output reg [15:0] outExtendedImmediate,
+		output reg [2:0] outRx,
+		output reg [2:0] outRy,
+		output reg [2:0] outRz
 	); 
 	
 	always @ (CLK)
@@ -64,12 +64,10 @@ module ID_EX (
 		jumpOut <= jumpIn;
 		RxToMemOut <= RxToMemIn;
 	    ALUOpOut <= ALUOpIn;
-	    ALUSrc1Out,
-	    ALUSrc2Out,
-	    regDstOut,
-	    branchOut,
-	    readSpecRegOut,
-	
+	    ALUSrc1Out <= ALUSrc1In;
+	    ALUSrc2Out <= ALUSrc2In;
+	    regDstOut <= regDstIn;
+	    branchOut <= branchIn;
+	    readSpecRegOut <= readSpecRegIn;
 	end
-	
 endmodule

@@ -290,7 +290,7 @@ module PipelineCPU(
 	EX_MEM ex_mem(
 		.CLK(CLK),
 		//input
-		.writeSpecRegIn(writeSpecReg_a_IDEX)
+		.writeSpecRegIn(writeSpecReg_a_IDEX),
 		.memtoRegIn(memtoReg_a_IDEX),
 		.regWriteIn(regWrite_a_IDEX),
 		.memReadIn(memRead_a_IDEX),
@@ -345,6 +345,7 @@ module PipelineCPU(
 	//modules in MEM/WB stage
 	//MEM_WB
 	MEM_WB mem_wb(
+		.CLK(CLK)
 		//input
 		.writeSpecRegIn(writeSpecReg_a_EXMEM),
 		.memtoRegIn(memtoReg_a_EXMEM),
