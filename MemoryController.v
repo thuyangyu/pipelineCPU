@@ -1,6 +1,5 @@
 `timescale 1ns / 1ps
 
-
 module MemoryController(
     input CLK,
     input RST,
@@ -19,7 +18,7 @@ module MemoryController(
 	output reg [17:0]ram1Addr,
 	inout [15:0]ram1Data,
     
-    //for the serial port
+    //output for the serial port
     output data_ready_out,
     output rdn_out,
     output tbre_out,
@@ -28,9 +27,12 @@ module MemoryController(
 );
 
 
+wire readMem;
+wire writeMem;
+assign readMem = (memRead[1:0] == 2'b01 || memRead[1:0] == 2'b10) && (memWrite[1:0] == 2'b00 )
+assign writeMem = (memWrite[1:0] == 2'b01 || memWrite[1:0] == 2'b10) && (memRead[1:0] == 2'b00 )
 
-
-
+assign ram1Data[15:0] = writeMem ? dataIn: 16'bZZZZ_ZZZZ_ZZZZ_ZZZZ;//choose between write and read
 
 parameter   S0 = 1'b0,
 S1 = 1'b1;
@@ -42,28 +44,42 @@ always @ (posedge CLK, negedge RST)
 begin
     if(!RST)begin
 
-        OEBuffer <= 1'b1;
-		WEBuffer <= 1'b1;
-		ENBuffer <= 1'b1;
-        DATABuffer[15:0] <= 16'b0000_1000_0000_0000;//NOP instruction
-		ADDRBuffer[17:0] <= 18'b0;
+        ram1OE <= 1'b1;
+		ram1WE <= 1'b1;
+		ram1EN <= 1'b1;
+		ram1Addr[17:0] <= 18'b0;
         
     end
     else begin
         case(state)
         S0:begin
-            ENBuffer <= 1'b0;//the 0 is enable
-            WEBuffer <= 1'b1;
-            OEBuffer <= 1'b1;
-            ADDRBuffer[17:0] <= {2'b0,address[15:0]};
+            if(readMem)begin
+                ram1OE <= 1'b1;
+                ram1WE <= 1'b1;
+                ram1EN <= 1'b0;//chip is always enabled, except reset
+                ram1Addr[17:0] <= {2'b00, address[15:0]};
+            end else if(writeMem) begin
+                ram1OE <= 1'b1;
+                ram1WE <= 1'b1;
+                ram1EN <= 1'b0;//chip is always enabled, except reset
+                ram1Addr[17:0] <= {2'b00, address[15:0]};
+            end
         end
         
         S1:begin
-            ENBuffer <= 1'b0;//the 0 is enable
-            WEBuffer <= 1'b1;
-            OEBuffer <= 1'b0;
-            ADDRBuffer[17:0] <= {2'b0,address[15:0]};
-            instruction[15:0] <= RAM2DATA[15:0]; 
+            if(readMem)begin
+                ram1OE <= 1'b0;//enable the read
+                ram1WE <= 1'b1;
+                ram1EN <= 1'b0;
+                ram1Addr[17:0] <= {2'b00, address[15:0]};
+                dataOut[15:0] = ram1Data[15:0];
+            end else if(writeMem) begin
+                ram1OE <= 1'b1;
+                ram1WE <= 1'b0;//enable the write
+                ram1EN <= 1'b0;
+                ram1Addr[17:0] <= {2'b00, address[15:0]};
+                
+            end
             
         end
         
