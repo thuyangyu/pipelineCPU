@@ -14,10 +14,10 @@ module PipelineCPU(
 	output ram2Addr,
 	inout  ram2Data,
     
-    output data_ready,
+    input data_ready,
+	input tbre,
+    input tsre,
     output rdn,
-    output tbre,
-    output tsre,
     output wrn
     
 )
@@ -349,11 +349,11 @@ module PipelineCPU(
 		.ram1Addr(ram1Addr),
 		.ram1Data(ram1Data),
         
-        .data_ready_out(data_ready),
-        .rdn_out(rdn),
-        .tbre_out(tbre),
-        .tsre_out(tsre),
-        .wrn_out(wrn),
+        .data_ready(data_ready),
+        .rdn(rdn),
+        .tbre(tbre),
+        .tsre(tsre),
+        .wrn(wrn),
 		
 		//input
 		.CLK(CLK),

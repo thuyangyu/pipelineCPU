@@ -19,11 +19,11 @@ module MemoryController(
 	inout [15:0]ram1Data,
     
     //output for the serial port
-    output data_ready_out,
-    output rdn_out,
-    output tbre_out,
-    output tsre_out,
-    output wrn_out
+	input tbre,
+    input tsre,
+    input data_ready,
+    output rdn,
+    output wrn
 );
 
 
