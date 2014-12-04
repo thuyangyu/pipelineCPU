@@ -345,7 +345,7 @@ module PipelineCPU(
 	//modules in MEM/WB stage
 	//MEM_WB
 	MEM_WB mem_wb(
-		.CLK(CLK)
+		.CLK(CLK),
 		//input
 		.writeSpecRegIn(writeSpecReg_a_EXMEM),
 		.memtoRegIn(memtoReg_a_EXMEM),
