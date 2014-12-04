@@ -325,7 +325,7 @@ module PipelineCPU(
 		
 		//output
 		.writeSpecRegOut(writeSpecReg_a_EXMEM),
-		.memtoRegOut(  	memtoReg_a_EXMEM),
+		.memtoRegOut(  	memToReg_a_EXMEM),
 		.regWriteOut(      	regWrite_a_EXMEM),
 		.memReadOut( 	    memRead_a_EXMEM),
 		.memWriteOut(	    memWrite_a_EXMEM),
@@ -374,7 +374,7 @@ module PipelineCPU(
 		.CLK(CLK),
 		//input
 		.writeSpecRegIn(writeSpecReg_a_EXMEM),
-		.memtoRegIn(memtoReg_a_EXMEM),
+		.memtoRegIn(memToReg_a_EXMEM),
 		.regWriteIn(regWrite_a_EXMEM),
 		.dataIn(data_a_MemController),
 		.ALUResultIn(ALUResult_a_EXMEM),
