@@ -15,8 +15,31 @@
 *.gise
 *.xise
 *.xml
+*.bld
+*.ncd
+*.ngc
+*.ngd
+*.ngr
+*.pad
+*.par
+*.pcf
+*.ptwx
+*.stx
+*.twr
+*.twx
+*.unroutes
+*.xpi
+*.map
+*.mrp
+*.ncd
+*.ngm
+*.csv
+ALU_pad.txt
+
 
 #Ignore these directories
 _xmsgs
 iseconfig
 xst
+_ngo
+xlnx_auto_0_xdb
