@@ -27,33 +27,25 @@ module MemoryController(
 );
 
 parameter 
-	PortRS0 = 4'd0,
-	PortRS1 = 4'd1,
-	PortRS2 = 4'd2,
-	PortRS3 = 4'd3,
-	PortWS0 = 4'd4,
-	PortWS1 = 4'd5,
-	PortWS2 = 4'd6,
-	PortWS3 = 4'd7,
-	S0 = 4'd8,
-	S1 = 4'd9;
+	S0 = 4'd0,
+	S1 = 4'd1,
+	S2 = 4'd2,
+	S3 = 4'd3;
 	
 	
-wire readMem;
-wire writeMem;
-assign readMem = (memRead[1:0] == 2'b01 || memRead[1:0] == 2'b10) && (memWrite[1:0] == 2'b00 );
-assign writeMem = (memWrite[1:0] == 2'b01 || memWrite[1:0] == 2'b10) && (memRead[1:0] == 2'b00 );
+wire read;
+wire write;
+assign read = (memRead[1:0] == 2'b01 || memRead[1:0] == 2'b10) && (memWrite[1:0] == 2'b00 );
+assign write = (memWrite[1:0] == 2'b01 || memWrite[1:0] == 2'b10) && (memRead[1:0] == 2'b00 );
 
-wire portRead;
-wire portWrite;
-assign portRead = (readMem && (address[15:0] == 16'hBF00));
-assign portWrite = (writeMem && (address[15:0] == 16'hBF00));
+//wire portRead;
+//wire portWrite;
+//assign portRead = (readMem && (address[15:0] == 16'hBF00));
+//assign portWrite = (writeMem && (address[15:0] == 16'hBF00));
 
 
-assign ram1Data[15:0] = writeMem ? dataIn: 16'bZZZZ_ZZZZ_ZZZZ_ZZZZ;//choose between write and read
+assign ram1Data[15:0] = write ? dataIn: 16'bZZZZ_ZZZZ_ZZZZ_ZZZZ;//choose between write and read
 
-parameter   S0 = 1'b0,
-S1 = 1'b1;
 
 reg state;//you can not assign the register value outside of the always block
 reg nextState;
@@ -66,62 +58,70 @@ begin
 		ram1WE <= 1'b1;
 		ram1EN <= 1'b1;
 		ram1Addr[17:0] <= 18'b0;
-        
+        nextState <= S0;
+		wrn <= 1'b1;
+		rdn <= 1'b1;
     end
     else begin
         case(state)
         S0:begin
-            if(readMem)begin
-                ram1OE <= 1'b1;
-                ram1WE <= 1'b1;
-                ram1EN <= 1'b0;//chip is always enabled, except reset
-                ram1Addr[17:0] <= {2'b00, address[15:0]};
-            end else if(writeMem) begin
+            if(read)begin
+				if(!address[15:0] == 16'hBF00)
+					begin
+						wrn <= 1'b1;
+						rdn <= 1'b1;
+					end
+				else 
+					begin
+						ram1OE <= 1'b1;
+						ram1WE <= 1'b1;
+						ram1EN <= 1'b0;//chip is always enabled, except reset
+						ram1Addr[17:0] <= {2'b00, address[15:0]};
+					end
+            end 
+			else if(write) begin
                 ram1OE <= 1'b1;
                 ram1WE <= 1'b1;
                 ram1EN <= 1'b0;//chip is always enabled, except reset
                 ram1Addr[17:0] <= {2'b00, address[15:0]};
             end
+			nextState <= S1;
         end
         
         S1:begin
-            if(readMem)begin
-                ram1OE <= 1'b0;//enable the read
-                ram1WE <= 1'b1;
-                ram1EN <= 1'b0;
-                ram1Addr[17:0] <= {2'b00, address[15:0]};
-                dataOut[15:0] = ram1Data[15:0];
-            end else if(writeMem) begin
+            if(read)begin
+				
+				if(!address[15:0] == 16'hBF00)
+					begin
+						wrn <= 1'b1;
+						rdn <= 1'b0;
+					end
+				else 
+					begin
+						ram1OE <= 1'b0;//enable the read
+						ram1WE <= 1'b1;
+						ram1EN <= 1'b0;
+						ram1Addr[17:0] <= {2'b00, address[15:0]};
+						dataOut[15:0] = ram1Data[15:0];
+					end
+            end else if(write) begin
                 ram1OE <= 1'b1;
                 ram1WE <= 1'b0;//enable the write
                 ram1EN <= 1'b0;
-                ram1Addr[17:0] <= {2'b00, address[15:0]};
-                
+                ram1Addr[17:0] <= {2'b00, address[15:0]};   
             end
-            
+            nextState <= S2;
         end
-        
-        endcase
-    end
-
-end
-
-
-//control the next state
-always @(posedge CLK, negedge RST)
-begin
-    if(!RST)begin
-        nextState = S0;
-    end
-    else begin
-        case(state)
-            S0:begin
-                nextState = S1;
-            end
-            
-            S1:begin
-                nextState = S0;
-            end
+		
+		S2:
+			begin
+			nextState <= S3;
+			end
+			
+		S3:
+			begin
+			nextState <= S0;
+			end
         endcase
     end
 end
