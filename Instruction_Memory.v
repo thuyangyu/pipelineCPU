@@ -12,7 +12,7 @@ module Instruction_Memory(
     output RAM2WE,
     output RAM2EN,
     output [17:0]RAM2ADDR,
-    inout [15:0] RAM2DATA,
+    inout [15:0] RAM2DATA
 );
 
 //these are the buffers of the outputs
@@ -22,25 +22,22 @@ reg ENBuffer;
 
 reg [15:0] DATABuffer;
 reg [17:0] ADDRBuffer;
-reg regWrite; //this is the fake regWrite signal, // I use this to be in the same format as the ram1
-assign regWrite = 1'b0;
+
 
 //assign those buffers
 assign RAM2OE = OEBuffer;
 assign  RAM2WE = WEBuffer;
 assign RAM2EN = ENBuffer;
 assign RAM2ADDR[17:0] = ADDRBuffer[17:0];
-assign RAM2DATA[15:0] = (regWrite) ? DATABuffer : 16'bZZZZ_ZZZZ_ZZZZ_ZZZZ;// I use this to be in the same format as the ram1
+assign RAM2DATA[15:0] =  16'bZZZZ_ZZZZ_ZZZZ_ZZZZ;
 
-//do not know if this is right ???
-assign instruction[15:0] = DATABuffer[15:0];
 
-parameter   S0 = 2'd0,
-S1 = 2'd1,
-S2 = 2'd2;
 
-reg [1:0] state;//you can not assign the register value outside of the always block
-reg [1:0] nextState;
+parameter   S0 = 1'b0,
+S1 = 1'b1;
+
+reg state;//you can not assign the register value outside of the always block
+reg nextState;
 
 always @ (posedge CLK, negedge RST)
 begin
@@ -48,7 +45,7 @@ begin
 
         OEBuffer <= 1'b1;
 		WEBuffer <= 1'b1;
-		ENBuffer <= 1'b0;
+		ENBuffer <= 1'b1;
         DATABuffer[15:0] <= 16'b0000_1000_0000_0000;//NOP instruction
 		ADDRBuffer[17:0] <= 18'b0;
         
@@ -56,18 +53,18 @@ begin
     else begin
         case(state)
         S0:begin
-            ENBuffer <= 1'b1;
+            ENBuffer <= 1'b0;//the 0 is enable
             WEBuffer <= 1'b1;
             OEBuffer <= 1'b1;
             ADDRBuffer[17:0] <= {2'b0,address[15:0]};
         end
         
         S1:begin
-            ENBuffer <= 1'b1;
+            ENBuffer <= 1'b0;//the 0 is enable
             WEBuffer <= 1'b1;
             OEBuffer <= 1'b0;
             ADDRBuffer[17:0] <= {2'b0,address[15:0]};
-            
+            instruction[15:0] <= RAM2DATA[15:0]; 
             
         end
         
