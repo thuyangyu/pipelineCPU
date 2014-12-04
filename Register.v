@@ -21,7 +21,8 @@ reg [15:0] registerT;
 
 always @ (negedge CLK) // we write the data into specific reg in the negedge
 begin
-    if(regWrite != 0)begin //only when it is 1, we write the value of the registers
+    if(regWrite)
+    begin //only when it is 1, we write the value of the registers
         case(writeSpecReg[1:0])
             2'b00: //this is the normal situation
             begin

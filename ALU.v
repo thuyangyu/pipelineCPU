@@ -5,7 +5,7 @@ module ALU(
     input [15:0] first,
     input [15:0] second,
     input [3:0] op,
-    output reg [15:0] result,
+    output [15:0] result,
     output zeroFlag
     );
 
