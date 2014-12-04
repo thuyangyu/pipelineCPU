@@ -6,9 +6,20 @@ module PipelineCPU(
 	output ram1WE
 	output ram1EN,
 	output ram1Addr,
-	inout    ram1Data,
-    //16 bit address bus
-	//16 bit 
+	inout  ram1Data,
+    
+    output ram2OE,
+	output ram2WE
+	output ram2EN,
+	output ram2Addr,
+	inout  ram2Data,
+    
+    output data_ready,
+    output rdn,
+    output tbre,
+    output tsre,
+    output wrn
+    
 )
 	//wires before PC
 	wire [15:0] next_PC;
@@ -139,7 +150,14 @@ module PipelineCPU(
         .RST(RST),
         .address(PCValue),
         .instruction(instruction_a_IM)
-        ); 
+        
+        //add some physical lines
+        .RAM2OE(ram2OE),
+        .RAM2WE(ram2WE),
+        .RAM2EN(ram2EN),
+        .RAM2ADDR(ram2Addr),
+        .RAM2DATA(ram2Data)
+        );     
 	
 	//modules in IFID stage
 	//IF_ID
@@ -320,8 +338,8 @@ module PipelineCPU(
 	
 	assign PCSrc = branch_a_EXMEM && zerobit_a_EXMEM;
 	
-	MemoryController mc(
-		//mem control signal
+	MemoryController mc(//this is the instruction memory
+		//memory control signal
 		.memRead(memRead_a_EXMEM),
 		.memWrite(memWrite_a_EXMEM),
 		//physical connection
@@ -330,6 +348,12 @@ module PipelineCPU(
 		.ram1EN(ram1EN),
 		.ram1Addr(ram1Addr),
 		.ram1Data(ram1Data),
+        
+        .data_ready_out(data_ready),
+        .rdn_out(rdn),
+        .tbre_out(tbre),
+        .tsre_out(tsre),
+        .wrn_out(wrn),
 		
 		//input
 		.CLK(CLK),
@@ -341,7 +365,7 @@ module PipelineCPU(
 		//output
 		.dataOut(data_a_MemController)
 	);
-	
+    
 	//modules in MEM/WB stage
 	//MEM_WB
 	MEM_WB mem_wb(
