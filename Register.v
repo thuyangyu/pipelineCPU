@@ -46,30 +46,13 @@ begin
     end
 end
 
-always @ () //we always read the register
-begin
-    case(readSpecReg[1:0])
-        2'b00: //this is the normal situation
-        begin
-            outData1 = generalRegister[R1[2:0]];
-            outData2 = generalRegister[R2[2:0]];
-        end
+//I change it to the assign combination logic
+wire [15:0]specialRegisters;
+wire [15:0]register_IH_or_T;
+assign outData2 = generalRegister[R2[2:0]];
+assign outData1 = (readSpecReg[1:0] == 2'b00) ? generalRegister[R1[2:0]]: specialRegisters;
+assign specialRegisters = readSpecReg[1] ? register_IH_or_T : registerSP;
+assign register_IH_or_T = readSpecReg[0] ? registerT: registerIH;
 
-        2'b01:
-        begin
-            outData1 = registerSP;
-        end
-
-        2'b10:
-        begin
-            outData1 = registerIH;
-        end
-
-        2'b11:
-        begin
-            outData1 = registerT;
-        end
-    endcase
-end
 
 endmodule
