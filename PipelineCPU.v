@@ -68,6 +68,9 @@ module PipelineCPU(
 
 	//wires after ID/EX
 	//13 + 7 + 2 + 2 + 7
+    //add the forward1 and forward2 declaration
+    wire [1:0] forward1;
+    wire [1:0] forward2;
 	wire [1:0] writeSpecReg_a_IDEX;
 	wire memToReg_a_IDEX;
 	wire regWrite_a_IDEX;
@@ -142,7 +145,7 @@ module PipelineCPU(
 	assign PCValue[15:0] = PC[15:0];
 	assign PCPlus[15:0] = PCValue[15:0] + 16'b1;        //temp add 1;
 	assign PC_b_IFID[15:0]               = IFIDWrite ? PC_a_IFID[15:0] : PCPlus[15:0];  //mux
-	assign instruction_b_IFID[15:0] = IFIDWrite ? instruction_a_IFID[15:0] : ((jump || PCSrc) ? 16'b0000_1000_0000_0000 : instruction_a_IM[15:0]);
+	assign instruction_b_IFID[15:0] = IFIDWrite ? instruction_a_IFID[15:0] : ((jump_a_IDEX || PCSrc) ? 16'b0000_1000_0000_0000 : instruction_a_IM[15:0]);
 	
 	//Instruction_Memory module
     Instruction_Memory im(
@@ -170,7 +173,7 @@ module PipelineCPU(
 		);
 	
 	//HazardDetector
-	module HazardDetector(
+	HazardDetector hd(
     .HD_instruction(instruction_a_IFID),
     .HD_memRead_a_IDEX(memRead_a_IDEX),
     .HD_Rx_a_IDEX(Rx_a_IDEX),
@@ -224,7 +227,6 @@ module PipelineCPU(
 
 	SignExtender se(
 		//input
-		.CLK(CLK),
 		.imSrcSelect(imSrcSelect), //select which part of the instruction is immediate
 		.instruction(instruction_a_IFID),
 		//output
@@ -263,7 +265,7 @@ module PipelineCPU(
 		.memReadOut( 		memRead_a_IDEX),
 		.memWriteOut(		memWrite_a_IDEX),
 		.jumpOut(				jump_a_IDEX),
-		RxToMemOut(      RxToMem_a_IDEX),
+		.RxToMemOut(      RxToMem_a_IDEX),
 		.ALUOpOut(           ALUOp_a_IDEX ),
 		.ALUSrc1Out(           ALUSrc1_a_IDEX ),
 		.ALUSrc2Out(           ALUSrc2_a_IDEX ),
@@ -285,10 +287,10 @@ module PipelineCPU(
 	assign PC_b_EXMEM = PC_a_IDEX + ExtendedImmediate_a_IDEX;
 	assign outData1Decided = forward1[1] ? dataToWriteBack : (forward1[0] ? ALUResult_a_EXMEM : outData1_a_IDEX);
 	assign outData2Decided = forward2[1] ? dataToWriteBack : (forward2[0] ? ALUResult_a_EXMEM : outData2_a_IDEX);
-	assign Data1_b_ALU = ALUSrc1[1] ? outData2Decided : (ALUSrc1[0] ? PC_a_IDEX : outData1Decided);
-	assign Data2_b_ALU = ALUSrc2[1] ? outData1Decided : (ALUSrc2[0] ? ExtendedImmediate_a_IDEX : outData2Decided);
+	assign Data1_b_ALU = ALUSrc1_a_IDEX[1] ? outData2Decided : (ALUSrc1_a_IDEX[0] ? PC_a_IDEX : outData1Decided);
+	assign Data2_b_ALU = ALUSrc2_a_IDEX[1] ? outData1Decided : (ALUSrc2_a_IDEX[0] ? ExtendedImmediate_a_IDEX : outData2Decided);
 	assign data_b_EXMEM = RxToMem_a_IDEX ? outData1Decided : outData2Decided;
-	assign registerToWriteId_b_EXMEM = regDst[1] ? Rz_a_IDEX : (regDst[0] ? Ry_a_IDEX : Rx_a_IDEX);
+	assign registerToWriteId_b_EXMEM = regDst_a_IDEX[1] ? Rz_a_IDEX : (regDst_a_IDEX[0] ? Ry_a_IDEX : Rx_a_IDEX);
 	
 	
 	ALU alu(  //central alu

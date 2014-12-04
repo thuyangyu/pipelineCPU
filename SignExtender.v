@@ -5,7 +5,7 @@ module SignExtender(
     input [3:0] imSrcSelect, //select which part of the instruction is immediate
     input [15:0] instruction,
 
-    output [15:0] ExtendedImmediateOut
+    output reg[15:0] ExtendedImmediateOut
 );
 
 always @(imSrcSelect or instruction)

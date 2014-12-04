@@ -9,8 +9,8 @@ input [2:0] R1, //where to read
 input [2:0] R2, //where to read
 input [2:0] R3, // this tells where to write
 input [15:0] inData3,
-output reg [15:0] outData1,
-output reg [15:0] outData2
+output [15:0] outData1,
+output [15:0] outData2
 
 );
 

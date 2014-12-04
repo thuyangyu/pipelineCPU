@@ -16,18 +16,18 @@ module EX_MEM(
 		input [2:0] registerToWriteIdIn,
 
 		//output
-		output [1:0] writeSpecRegOut,
-		output memtoRegOut,
-		output regWriteOut,
-		output [1:0] memReadOut,
-		output [1:0] memWriteOut,
-		output branchOut,
-		output [15:0] PCOut,
-
-		output [15:0] ALUResultOut,
-		output zerobitOut,
-		output [15:0] dataOut,
-		output [2:0] registerToWriteId
+		output reg [1:0] writeSpecRegOut,
+		output reg memtoRegOut,
+		output reg regWriteOut,
+		output reg [1:0] memReadOut,
+		output reg [1:0] memWriteOut,
+		output reg branchOut,
+		output reg [15:0] PCOut,
+              
+		output reg [15:0] ALUResultOut,
+		output reg zerobitOut,
+		output reg [15:0] dataOut,
+		output reg [2:0] registerToWriteId
 	);
 	
 	always @ (CLK)

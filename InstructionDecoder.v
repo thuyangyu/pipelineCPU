@@ -3,20 +3,20 @@
 module InstructionDecoder(
 	//rx express 10 to 8 bit in instruction, ry express 7 to 5 bit, rz express 4 to 2;
     input  [15:0] instruction,	
-    output [3:0] imSelector,
-    output [1:0] ALUSrc2,
-    output [1:0] memWrite,
-    output [1:0] memRead,
-    output [1:0]regDst,   
-	output branch, 
-	output regWrite,
-	output memToReg,
-	output [3:0]op,
-	output [1:0]readSpecReg,
-	output [1:0]writeSpecReg,
-	output jump,     
-	output [1:0]ALUSrc1,
-	output rxToMem
+    output reg[3:0] imSelector,
+    output reg[1:0] ALUSrc2,
+    output reg[1:0] memWrite,
+    output reg[1:0] memRead,
+    output reg[1:0]regDst,   
+	output reg branch, 
+	output reg regWrite,
+	output reg memToReg,
+	output reg [3:0]op,
+	output reg [1:0]readSpecReg,
+	output reg[1:0]writeSpecReg,
+	output reg jump,     
+	output reg [1:0]ALUSrc1,
+	output reg rxToMem
 	
     );
     
@@ -597,7 +597,7 @@ case(instruction[15:11])
                 rxToMem = 1'b0;
             end
             
-            2'b0000_0001:
+            8'b0000_0001:
             begin
                 //MTIH
                 imSelector = 4'b0000;

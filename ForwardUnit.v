@@ -17,22 +17,22 @@ module ForwardUnit(
 );
     
     //the wire for the forward 1
-    wire forward1_a;
-    wire forward1_EXMEM; //regWrite_a_MEMWB == 1'b1 && regWrite_a_EXMEM == 1'b1
-    wire forward1_b;
-    wire forward1_c;
-    wire forward1_EX; //regWrite_a_MEMWB == 1'b0 && regWrite_a_EXMEM == 1'b1
-    wire forward1_MEM; //regWrite_a_MEMWB == 1'b1 && regWrite_a_EXMEM == 1'b0
-    wire forward1_maybeEX;
-    wire forward1_d;
-    wire forward1_maybeMEM;
+    wire [1:0]forward1_a;
+    wire [1:0]forward1_EXMEM; //regWrite_a_MEMWB == 1'b1 && regWrite_a_EXMEM == 1'b1
+    wire [1:0]forward1_b;
+    wire [1:0]forward1_c;
+    wire [1:0]forward1_EX; //regWrite_a_MEMWB == 1'b0 && regWrite_a_EXMEM == 1'b1
+    wire [1:0]forward1_MEM; //regWrite_a_MEMWB == 1'b1 && regWrite_a_EXMEM == 1'b0
+    wire [1:0]forward1_maybeEX;
+    wire [1:0]forward1_d;
+    wire [1:0]forward1_maybeMEM;
 
     //the wire for the forward 2
-    wire forward2_a;
-    wire forward2_EXMEM; //regWrite_a_MEMWB == 1'b1 && regWrite_a_EXMEM == 1'b1
-    wire forward2_b;
-    wire forward2_EX; 
-    wire forward2_MEM;
+    wire [1:0]forward2_a;
+    wire [1:0]forward2_EXMEM; //regWrite_a_MEMWB == 1'b1 && regWrite_a_EXMEM == 1'b1
+    wire [1:0]forward2_b;
+    wire [1:0]forward2_EX; 
+    wire [1:0]forward2_MEM;
 
     //the logic for the forward 1
     assign forward1 = (regWrite_a_MEMWB == 1'b0 && regWrite_a_EXMEM == 1'b0) ? 2'b00: forward1_a;

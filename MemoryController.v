@@ -22,8 +22,8 @@ module MemoryController(
 	input tbre,
     input tsre,
     input data_ready,
-    output rdn,
-    output wrn
+    output reg rdn,
+    output reg wrn
 );
 
 parameter 
