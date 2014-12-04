@@ -4,16 +4,16 @@
 module ALU(
     input [15:0] first,
     input [15:0] second,
-    input [3:0] op;
+    input [3:0] op,
     output [15:0] result,
-    output zeroFlag;
+    output zeroFlag
     );
 
 assign zeroFlag = (result[15:0] == 16'b0)? 1'b1: 1'b0;
 
 always @(first or second or op)
 begin
-    case(op):
+    case(op)
 
     4'b0000:
     begin

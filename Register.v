@@ -22,7 +22,7 @@ reg [15:0] registerT;
 always @ (negedge CLK) // we write the data into specific reg in the negedge
 begin
     if(regWrite != 0)begin //only when it is 1, we write the value of the registers
-        case(writeSpecReg[1:0]):
+        case(writeSpecReg[1:0])
             2'b00: //this is the normal situation
             begin
                 generalRegister[R3[2:0]] <= inData3;
@@ -48,26 +48,26 @@ end
 
 always @ () //we always read the register
 begin
-    case(readSpecReg[1:0]):
+    case(readSpecReg[1:0])
         2'b00: //this is the normal situation
         begin
-            outData1 <= generalRegister[R1[2:0]];
-            outData2 <= generalRegister[R2[2:0]];
+            outData1 = generalRegister[R1[2:0]];
+            outData2 = generalRegister[R2[2:0]];
         end
 
         2'b01:
         begin
-            outData1 <= registerSP;
+            outData1 = registerSP;
         end
 
         2'b10:
         begin
-            outData1 <= registerIH;
+            outData1 = registerIH;
         end
 
         2'b11:
         begin
-            outData1 <= registerT;
+            outData1 = registerT;
         end
     endcase
 end

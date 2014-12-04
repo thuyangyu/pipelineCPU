@@ -18,7 +18,7 @@ module MemoryController(
 	output reg [17:0]ram1Addr,
 	inout [15:0]ram1Data,
     
-    //output for the serial port
+    //input , output for the serial port
 	input tbre,
     input tsre,
     input data_ready,
@@ -26,11 +26,29 @@ module MemoryController(
     output wrn
 );
 
-
+parameter 
+	PortRS0 = 4'd0,
+	PortRS1 = 4'd1,
+	PortRS2 = 4'd2,
+	PortRS3 = 4'd3,
+	PortWS0 = 4'd4,
+	PortWS1 = 4'd5,
+	PortWS2 = 4'd6,
+	PortWS3 = 4'd7,
+	S0 = 4'd8,
+	S1 = 4'd9;
+	
+	
 wire readMem;
 wire writeMem;
-assign readMem = (memRead[1:0] == 2'b01 || memRead[1:0] == 2'b10) && (memWrite[1:0] == 2'b00 )
-assign writeMem = (memWrite[1:0] == 2'b01 || memWrite[1:0] == 2'b10) && (memRead[1:0] == 2'b00 )
+assign readMem = (memRead[1:0] == 2'b01 || memRead[1:0] == 2'b10) && (memWrite[1:0] == 2'b00 );
+assign writeMem = (memWrite[1:0] == 2'b01 || memWrite[1:0] == 2'b10) && (memRead[1:0] == 2'b00 );
+
+wire portRead;
+wire portWrite;
+assign portRead = (readMem && (address[15:0] == 16'hBF00));
+assign portWrite = (writeMem && (address[15:0] == 16'hBF00));
+
 
 assign ram1Data[15:0] = writeMem ? dataIn: 16'bZZZZ_ZZZZ_ZZZZ_ZZZZ;//choose between write and read
 

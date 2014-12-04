@@ -10,10 +10,10 @@ module SignExtender(
 
 always @(imSrcSelect or instruction)
 begin
-    case(imSrcSelect[3]):
+    case(imSrcSelect[3])
     1'b0: //zero extended
     begin
-        case(imSrcSelect[2:0]):
+        case(imSrcSelect[2:0])
         3'b000:
         begin
             ExtendedImmediateOut[7:0] = instruction[7:0];
@@ -56,7 +56,7 @@ begin
 
     1'b1: //signed extended
     begin
-        case(imSrcSelect[2:0]):
+        case(imSrcSelect[2:0])
         3'b000:
         begin
             ExtendedImmediateOut[15:0] = { {8{instruction[7]}},instruction[7:0]};

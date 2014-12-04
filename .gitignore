@@ -5,4 +5,18 @@
 *.swp
 *.out
 *.ods#
+*.cmd_log
+*.lso
+*.prj
+*.syr
+*.xst
+*.html
+*.xrpt
+*.gise
+*.xise
+*.xml
 
+#Ignore these directories
+_xmsgs
+iseconfig
+xst

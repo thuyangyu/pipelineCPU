@@ -1,15 +1,15 @@
 module PipelineCPU(
-    input CLK;
-    input RST;
+    input CLK,
+    input RST,
 	
 	output ram1OE,
-	output ram1WE
+	output ram1WE,
 	output ram1EN,
 	output ram1Addr,
 	inout  ram1Data,
     
     output ram2OE,
-	output ram2WE
+	output ram2WE,
 	output ram2EN,
 	output ram2Addr,
 	inout  ram2Data,
@@ -20,7 +20,7 @@ module PipelineCPU(
     output rdn,
     output wrn
     
-)
+);
 	//wires before PC
 	wire [15:0] next_PC;
 	
@@ -142,14 +142,14 @@ module PipelineCPU(
 	assign PCValue[15:0] = PC[15:0];
 	assign PCPlus[15:0] = PCValue[15:0] + 16'b1;        //temp add 1;
 	assign PC_b_IFID[15:0]               = IFIDWrite ? PC_a_IFID[15:0] : PCPlus[15:0];  //mux
-	assign instruction_b_IFID[15:0] = IFIDWrite ? instruction_a_IFID[15:0] : ((jump || PCSrc) ? 16b0000_1000_0000_0000 : instruction_a_IM[15:0]);
+	assign instruction_b_IFID[15:0] = IFIDWrite ? instruction_a_IFID[15:0] : ((jump || PCSrc) ? 16'b0000_1000_0000_0000 : instruction_a_IM[15:0]);
 	
 	//Instruction_Memory module
     Instruction_Memory im(
         .CLK(CLK),
         .RST(RST),
         .address(PCValue),
-        .instruction(instruction_a_IM)
+        .instruction(instruction_a_IM),
         
         //add some physical lines
         .RAM2OE(ram2OE),
@@ -252,7 +252,7 @@ module PipelineCPU(
 		.RxToMemIn(RxToMem_a_Decoder),
 		.ALUOpIn(ALUOp_a_Decoder),
 		.ALUSrc1In(ALUSrc1_a_Decoder),
-		.ALUSrc2In(ALUSrc2_a_Decoder)
+		.ALUSrc2In(ALUSrc2_a_Decoder),
 		.regDstIn(regDst_a_Decoder),
 		.branchIn(branch_a_Decoder),
 		.readSpecRegIn(readSpecReg_a_Decoder),
@@ -406,7 +406,7 @@ module PipelineCPU(
     .forward2(forward2)
 	);
 
-	assign next_PC = PCWrite ? PCValue : (jump_a_IDEX ? outData1Decided : (PCSrc ? PC_a_EXMEM : PCPlus))
+	assign next_PC = PCWrite ? PCValue : (jump_a_IDEX ? outData1Decided : (PCSrc ? PC_a_EXMEM : PCPlus));
 	always @ (posedge CLK)
 		PC <= next_PC;
 	

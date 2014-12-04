@@ -1,6 +1,6 @@
 //MEM_WB
-MEM_WB mem_wb(
-	input CLK;
+module MEM_WB(
+	input CLK,
 	//input
 	input [1:0] writeSpecRegIn,
 	input memtoRegIn,

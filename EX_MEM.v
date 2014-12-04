@@ -1,5 +1,5 @@
 //EX_MEM
-EX_MEM ex_mem(
+module EX_MEM(
 		input CLK,
 		//input
 		input [1:0] writeSpecRegIn,

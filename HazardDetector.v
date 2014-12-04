@@ -25,9 +25,9 @@ module HazardDetector(
     assign HD_PCWrite = needToAddBubble;
     assign HD_IFIDWrite = needToAddBubble;
 
-    assign needToAddBubble =  (HD_IDEX_memread[1:0] == 2'b00 || HD_IDEX_memread[1:0] == 2'b11)? 1'b0 : needToAddBubble_1;
+    assign needToAddBubble =  (HD_memread_a_IDEX[1:0] == 2'b00 || HD_memread_a_IDEX[1:0] == 2'b11)? 1'b0 : needToAddBubble_1;
 
-    assign needToAddBubble_1 = (HD_IDEX_memread[1:0] == 2'b01) ? needToAddBubble_for_LW : needToAddBubble_for_LWSP
+    assign needToAddBubble_1 = (HD_memread_a_IDEX[1:0] == 2'b01) ? needToAddBubble_for_LW : needToAddBubble_for_LWSP;
     
     assign needToAddBubble_for_LW = (HD_Ry_a_IDEX[2:0] == IFID_rx[2:0] ||HD_Ry_a_IDEX[2:0] == IFID_ry[2:0]) ? 1'b1 : 1'b0;
 
