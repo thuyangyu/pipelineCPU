@@ -20,14 +20,14 @@ reg OEBuffer;
 reg WEBuffer;
 reg ENBuffer;
 
-reg [17:0] ADDRBuffer;
+reg [15:0] ADDRBuffer;
 
 
 //assign those buffers
 assign RAM2OE = OEBuffer;
 assign  RAM2WE = WEBuffer;
 assign RAM2EN = ENBuffer;
-assign RAM2ADDR[17:0] = ADDRBuffer[17:0];
+assign RAM2ADDR[17:0] = {2'b0, ADDRBuffer[15:0]};
 assign RAM2DATA[15:0] =  16'bZZZZ_ZZZZ_ZZZZ_ZZZZ;
 
 
@@ -45,7 +45,7 @@ begin
         OEBuffer <= 1'b1;
 		WEBuffer <= 1'b1;
 		ENBuffer <= 1'b1;
-		ADDRBuffer[17:0] <= 18'b0;
+		ADDRBuffer[15:0] <= 16'b0;
         
     end
     else begin
@@ -54,14 +54,14 @@ begin
             ENBuffer <= 1'b0;//the 0 is enable
             WEBuffer <= 1'b1;
             OEBuffer <= 1'b1;
-            ADDRBuffer[17:0] <= {2'b0,address[15:0]};
+            ADDRBuffer[15:0] <= address[15:0];
         end
         
         S1:begin
             ENBuffer <= 1'b0;//the 0 is enable
             WEBuffer <= 1'b1;
             OEBuffer <= 1'b0;
-            ADDRBuffer[17:0] <= {2'b0,address[15:0]};
+            ADDRBuffer[15:0] <= address[15:0];
             instruction[15:0] <= RAM2DATA[15:0]; 
             
         end

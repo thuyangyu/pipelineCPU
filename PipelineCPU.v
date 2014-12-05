@@ -5,14 +5,14 @@ module PipelineCPU(
 	output ram1OE,
 	output ram1WE,
 	output ram1EN,
-	output ram1Addr,
-	inout  ram1Data,
+	output [17:0] ram1Addr,
+	inout  [15:0] ram1Data,
     
     output ram2OE,
 	output ram2WE,
 	output ram2EN,
-	output ram2Addr,
-	inout  ram2Data,
+	output [17:0] ram2Addr,
+	inout  [15:0] ram2Data,
     
     input data_ready,
 	input tbre,
@@ -123,7 +123,7 @@ module PipelineCPU(
 	
 	wire PCSrc;
 	
-	wire data_a_MemController;
+	wire [15:0] data_a_MemController;
 	
 	//wires after MEM/WB
 	//3 + 3 + 1 wires

@@ -15,7 +15,7 @@ module MemoryController(
     output reg ram1OE,
 	output reg ram1WE,
 	output reg ram1EN,
-	output reg [17:0]ram1Addr,
+	output [17:0]ram1Addr,
 	inout [15:0]ram1Data,
     
     //input , output for the serial port
@@ -44,6 +44,8 @@ assign write = (memWrite[1:0] == 2'b01 || memWrite[1:0] == 2'b10) && (memRead[1:
 
 assign ram1Data[15:0] = write ? dataIn: 16'bZZZZ_ZZZZ_ZZZZ_ZZZZ;//choose between write and read
 
+reg [15:0] ram1AddrBuffer;
+assign ram1Addr[17:0] = {2'b0, ram1AddrBuffer[15:0]};
 
 reg  state;//you can not assign the register value outside of the always block
 reg  nextState;
@@ -54,7 +56,7 @@ begin
         ram1OE <= 1'b1;
 		ram1WE <= 1'b1;
 		ram1EN <= 1'b1;
-		ram1Addr[17:0] <= 18'b0;
+		ram1AddrBuffer[15:0] <= 16'b0;
         nextState <= S0;
 		wrn <= 1'b1;
 		rdn <= 1'b1;
@@ -75,7 +77,7 @@ begin
 			rdn <= 1'b1;
 			ram1OE <= 1'b1;
             ram1WE <= 1'b1;
-			ram1Addr[17:0] <= {2'b00, address[15:0]};
+			ram1AddrBuffer[15:0] <= address[15:0];
 			nextState <= S1;
         end
         
@@ -111,7 +113,7 @@ begin
 								ram1EN <= 1'b0;
 								wrn <= 1'b1;
 								rdn <= 1'b1;
-								ram1Addr[17:0] <= {2'b00, address[15:0]};
+								ram1AddrBuffer[15:0] <= address[15:0];
 								dataOut[15:0] <= ram1Data[15:0];
 							end
 				endcase
@@ -143,12 +145,12 @@ begin
 								ram1OE <= 1'b1;
 								ram1WE <= 1'b0;//enable the write
 								ram1EN <= 1'b0;
-								ram1Addr[17:0] <= {2'b00, address[15:0]};   
+								ram1AddrBuffer[15:0] <= address[15:0];   
 							end
-				endcase
-            end
+				endcase //end of case address
+            end //end of if write
             nextState <= S0;
-        end
+        end //end of S1 begin
         endcase
     end
 end
