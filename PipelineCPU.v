@@ -246,7 +246,7 @@ module PipelineCPU(
 		.inExtendedImmediate(ExtendedImmediate_a_SE),
 		
 		.writeSpecRegIn(writeSpecReg_a_Decoder),
-		.memtoRegIn(memtoReg_a_Decoder),
+		.memtoRegIn(memToReg_a_Decoder),
 		.regWriteIn(regWrite_b_IDEX),  //mux before it
 		.memReadIn(memRead_a_Decoder),
 		.memWriteIn(memWrite_b_IDEX),  //mux before it
@@ -260,7 +260,7 @@ module PipelineCPU(
 		.readSpecRegIn(readSpecReg_a_Decoder),
 		
 		.writeSpecRegOut(writeSpecReg_a_IDEX),
-		.memtoRegOut(  	memtoReg_a_IDEX),
+		.memtoRegOut(  	memToReg_a_IDEX),
 		.regWriteOut(      	regWrite_a_IDEX),
 		.memReadOut( 		memRead_a_IDEX),
 		.memWriteOut(		memWrite_a_IDEX),
@@ -311,7 +311,7 @@ module PipelineCPU(
 		.CLK(CLK),
 		//input
 		.writeSpecRegIn(writeSpecReg_a_IDEX),
-		.memtoRegIn(memtoReg_a_IDEX),
+		.memtoRegIn(memToReg_a_IDEX),
 		.regWriteIn(regWrite_a_IDEX),
 		.memReadIn(memRead_a_IDEX),
 		.memWriteIn(memWrite_a_IDEX),
@@ -381,7 +381,7 @@ module PipelineCPU(
 		.registerToWriteIdIn(registerToWriteId_a_EXMEM),
 		//output
 		.writeSpecRegOut(writeSpecReg_a_MEMWB),
-		.memtoRegOut(  	memtoReg_a_MEMWB),
+		.memtoRegOut(  	memToReg_a_MEMWB),
 		.regWriteOut(      	regWrite_a_MEMWB),
 		.dataOut(data_a_MEMWB),
 		.ALUResultOut(ALUResult_a_MEMWB),

@@ -30,7 +30,7 @@ module EX_MEM(
 		output reg [2:0] registerToWriteId
 	);
 	
-	always @ (CLK)
+	always @ (posedge CLK)
 		begin
 			writeSpecRegOut <= writeSpecRegIn;
 			memtoRegOut <= memtoRegIn;

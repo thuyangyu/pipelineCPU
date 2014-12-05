@@ -46,7 +46,7 @@ module ID_EX (
 		output reg [2:0] outRz
 	); 
 	
-	always @ (CLK)
+	always @ (posedge CLK)
 	begin
 		PCOut <= PCIn;
 		outData1 <= inData1;
