@@ -8,7 +8,7 @@ module PipelineCPU(
 	output [17:0] ram1Addr,
 	inout  [15:0] ram1Data,
     
-    output ram2OE,
+   output ram2OE,
 	output ram2WE,
 	output ram2EN,
 	output [17:0] ram2Addr,
