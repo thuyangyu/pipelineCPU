@@ -10,7 +10,8 @@ input [2:0] R2, //where to read
 input [2:0] R3, // this tells where to write
 input [15:0] inData3,
 output [15:0] outData1,
-output [15:0] outData2
+output [15:0] outData2,
+output [175:0] allRegistersDataToShow 
 
 );
 
@@ -18,6 +19,9 @@ reg [15:0] generalRegister [7:0];
 reg [15:0] registerSP;
 reg [15:0] registerIH;
 reg [15:0] registerT;
+
+//show the data of all the register
+assign allRegistersDataToShow[175:0] = {generalRegister[0][15:0],generalRegister[1][15:0],generalRegister[2][15:0],generalRegister[3][15:0],generalRegister[4][15:0],generalRegister[5][15:0],generalRegister[6][15:0],generalRegister[7][15:0],registerSP[15:0],registerIH[15:0],registerT[15:0]};
 
 always @ (negedge CLK) // we write the data into specific reg in the negedge
 begin

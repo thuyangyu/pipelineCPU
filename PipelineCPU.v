@@ -1,5 +1,5 @@
 module PipelineCPU(
-    input CLK,
+    input CLK,//this is the 50HZ clk
     input RST,
 	
 	output ram1OE,
@@ -8,7 +8,7 @@ module PipelineCPU(
 	output [17:0] ram1Addr,
 	inout  [15:0] ram1Data,
     
-   output ram2OE,
+    output ram2OE,
 	output ram2WE,
 	output ram2EN,
 	output [17:0] ram2Addr,
@@ -18,7 +18,17 @@ module PipelineCPU(
 	input tbre,
     input tsre,
     output rdn,
-    output wrn
+    output wrn,
+    
+    //for the VGA
+    output hs_topLevelOutForVGA,
+    output vs_topLevelOutForVGA,
+    output [2:0] r_topLevelOutForVGA, 
+    output [2:0] g_topLevelOutForVGA, 
+    output [2:0] b_topLevelOutForVGA,
+    
+    //for the button
+    input button
     
 );
 	//wires before PC
@@ -136,8 +146,81 @@ module PipelineCPU(
 	wire [2:0] registerToWriteId_a_MEMWB;
 	
 	wire [15:0] dataToWriteBack;
+    
+    //added to show the registers data
+    wire [175:0] allRegistersDataLine;
 
 	//************************************* start attachment
+    
+    // deal with the frequency division,added code
+    reg CLK25, CLK12;
+
+    always @ (posedge CLK, negedge RST)
+    begin
+      if (!RST)
+        CLK25 = 0;
+      else
+        CLK25 = ~ CLK25;
+    end
+
+    always @ (posedge CLK25 or negedge RST)
+      if (!RST)
+        CLK12 = 0;
+      else
+        CLK12 = ~ CLK12;
+         
+
+    //add to deal with the button triggered
+    reg buttonTriggered;//this is the signal that a button is pushed by the user
+    reg formerButton;// the register to remember the last button value
+    reg buttonTriggered_half;//half the frequency of the buttonTriggered
+    
+    always @(posedge CLK)
+    begin
+            formerButton <= button;
+    end
+
+    always @ (posedge CLK, negedge RST)
+    begin
+        if(!RST)
+            buttonTriggered <= 1'b0;
+        else
+            begin
+                if({formerButton,button} == 2'b10)
+                    buttonTriggered <= 1'b1;
+                else 
+                    buttonTriggered <= 1'b0;
+            end
+        
+    end
+    
+    always @ (posedge buttonTriggered or negedge RST)
+      if (!RST)
+        buttonTriggered_half = 0;
+      else
+        buttonTriggered_half = ~ buttonTriggered_half;
+        
+        
+    
+    //this is the display module, I place it at the beginning
+    GraphicCard gc(
+      .clk(CLK25),//this should be a really quick CLK even using single step 
+      .rst(RST),
+      .registerVGA(allRegistersDataLine),
+      .IfPC(16'b0001_0001_0001_0001), 
+      .IfIR(16'b0010_0010_0010_0010),
+      .registerS(4'b0011), 
+      .registerM(4'b0100), 
+      .IdRegisterT(4'b0101), 
+      .MeRegisterT(4'b0110),
+      .ExCalResult(16'b0111_0111_0111_0111), 
+      .MeCalResult(16'b1000_1000_1000_1000),
+      .hs(hs_topLevelOutForVGA), //output for physical
+      .vs(vs_topLevelOutForVGA), //output for physical
+      .r(r_topLevelOutForVGA),   //output for physical
+      .g(g_topLevelOutForVGA),   //output for physical
+      .b(b_topLevelOutForVGA)    //output for physical
+    );
 	
 	//modules in PC stage
 	//PC module
@@ -149,7 +232,7 @@ module PipelineCPU(
 	
 	//Instruction_Memory module
     Instruction_Memory im(
-        .CLK(CLK),
+        .CLK(buttonTriggered),
         .RST(RST),
         .address(PCValue),
         .instruction(instruction_a_IM),
@@ -165,7 +248,7 @@ module PipelineCPU(
 	//modules in IFID stage
 	//IF_ID
 	IF_ID if_id(
-		.CLK(CLK),
+		.CLK(buttonTriggered_half),
 		.PCIn(PC_b_IFID), 									//input
 		.instructionIn(instruction_b_IFID),      //input
 		.PCOut(PC_a_IFID),			   				   //output
@@ -211,7 +294,7 @@ module PipelineCPU(
 	
 	//Registers
 	Registers registers(
-		.CLK(CLK),
+		.CLK(buttonTriggered_half),
 		.regWrite(regWrite_a_MEMWB),   //RegWrite == 1 express write, == 0 express read;
 		.writeSpecReg(writeSpecReg_a_MEMWB),
 		.readSpecReg(readSpecReg_a_Decoder),
@@ -220,8 +303,9 @@ module PipelineCPU(
 		.R3(instruction_a_IFID[4:2]),
 		.inData3(dataToWriteBack),
 		.outData1(outData1_a_Registers),
-		.outData2(outData2_a_Registers)
-		//input
+		.outData2(outData2_a_Registers),
+        .allRegistersDataToShow(allRegistersDataLine)
+		
 		);
 		
 
@@ -236,7 +320,7 @@ module PipelineCPU(
 	//modules in ID/EX stage
 	//ID_EX
 	ID_EX id_ex(
-		.CLK(CLK),
+		.CLK(buttonTriggered_half),
 		.PCIn(PC_a_IFID), 					//input
 		.inData1(outData1_a_Registers),    //input
 		.inData2(outData2_a_Registers),
@@ -308,7 +392,7 @@ module PipelineCPU(
 	//modules in EX/MEM stage
 	//EX_MEM
 	EX_MEM ex_mem(
-		.CLK(CLK),
+		.CLK(buttonTriggered_half),
 		//input
 		.writeSpecRegIn(writeSpecReg_a_IDEX),
 		.memtoRegIn(memToReg_a_IDEX),
@@ -341,6 +425,10 @@ module PipelineCPU(
 	assign PCSrc = branch_a_EXMEM && zerobit_a_EXMEM;
 	
 	MemoryController mc(//this is the instruction memory
+        //input
+		.CLK(buttonTriggered),
+		.RST(RST),
+        
 		//memory control signal
 		.memRead(memRead_a_EXMEM),
 		.memWrite(memWrite_a_EXMEM),
@@ -356,11 +444,7 @@ module PipelineCPU(
         .tbre(tbre),
         .tsre(tsre),
         .wrn(wrn),
-		
-		//input
-		.CLK(CLK),
-		.RST(RST),
-		
+	
 		.address(ALUResult_a_EXMEM),
 		.dataIn(data_a_EXMEM),
 		
@@ -371,7 +455,7 @@ module PipelineCPU(
 	//modules in MEM/WB stage
 	//MEM_WB
 	MEM_WB mem_wb(
-		.CLK(CLK),
+		.CLK(buttonTriggered_half),
 		//input
 		.writeSpecRegIn(writeSpecReg_a_EXMEM),
 		.memtoRegIn(memToReg_a_EXMEM),
@@ -409,7 +493,10 @@ module PipelineCPU(
 	);
 
 	assign next_PC = PCWrite ? PCValue : (jump_a_IDEX ? outData1Decided : (PCSrc ? PC_a_EXMEM : PCPlus));
-	always @ (posedge CLK)
+	always @ (posedge buttonTriggered_half)
 		PC <= next_PC;
+        
+
+
 	
 endmodule

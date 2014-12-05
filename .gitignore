@@ -34,6 +34,17 @@
 *.ncd
 *.ngm
 *.csv
+*.ipf
+*.ut
+*.xwbt
+*.bgn
+*.bit
+*.drc
+*.debug
+*.log
+*.xsl
+PipelineCPU_pad.txt
+
 ALU_pad.txt
 
 
@@ -43,3 +54,5 @@ iseconfig
 xst
 _ngo
 xlnx_auto_0_xdb
+planAhead_run_2
+planAhead_run_3
