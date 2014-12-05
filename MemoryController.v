@@ -101,8 +101,8 @@ begin
 								wrn <= 1'b1;
 								rdn <= 1'b1;
 								dataOut[15:2] <= 14'b0;
-								dataOut[1] <= data_ready ? 1'b1; 1'b0;
-								dataOut[0] <= (tsre && tbre) ? 1'b1; 1'b0;
+								dataOut[1] <= data_ready ? 1'b1: 1'b0;
+								dataOut[0] <= (tsre && tbre) ? 1'b1: 1'b0;
 							end
 						default:
 							begin				

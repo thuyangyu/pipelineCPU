@@ -31,19 +31,19 @@ module ForwardUnit(
     wire [1:0]forward2_a;
     wire [1:0]forward2_EXMEM; //regWrite_a_MEMWB == 1'b1 && regWrite_a_EXMEM == 1'b1
     wire [1:0]forward2_b;
-    wire [1:0]forward2_EX; 
-    wire [1:0]forward2_MEM;
+    wire [1:0]forward2_EX; //regWrite_a_MEMWB == 1'b0 && regWrite_a_EXMEM == 1'b1
+    wire [1:0]forward2_MEM;//regWrite_a_MEMWB == 1'b1 && regWrite_a_EXMEM == 1'b0
 
     //the logic for the forward 1
     assign forward1 = (regWrite_a_MEMWB == 1'b0 && regWrite_a_EXMEM == 1'b0) ? 2'b00: forward1_a;
     assign forward1_a = (regWrite_a_MEMWB == 1'b1 && regWrite_a_EXMEM == 1'b1) ? forward1_EXMEM : forward1_b;
     assign forward1_EXMEM = (forward1_EX[1:0] != 2'b00) ? forward1_EX: forward1_MEM;
     assign forward1_b = (regWrite_a_EXMEM == 1'b1) ? forward1_EX : forward1_MEM;
-    assign forward1_EX = (writeSpecReg_a_EXMEM != readSpecReg_a_IDEX) ? 2'b00 :forward1_c;
-    assign forward1_c = (writeSpecReg_a_EXMEM != 2'b00) ? 2'b01: forward1_maybeEX;
+    assign forward1_EX = (writeSpecReg_a_EXMEM[1:0] != readSpecReg_a_IDEX[1:0]) ? 2'b00 :forward1_c;
+    assign forward1_c = (writeSpecReg_a_EXMEM[1:0] != 2'b00) ? 2'b01: forward1_maybeEX;
     assign forward1_maybeEX = (registerToWriteId_a_EXMEM[2:0] == Rx_a_IDEX[2:0]) ? 2'b01: 2'b00;
-    assign forward1_MEM = (writeSpecReg_a_MEMWB != regWrite_a_EXMEM) ? 2'b00 :forward1_d;
-    assign forward1_d = (writeSpecReg_a_MEMWB != 2'b00) ? 2'b10: forward1_maybeMEM;
+    assign forward1_MEM = (writeSpecReg_a_MEMWB[1:0] != readSpecReg_a_IDEX[1:0]) ? 2'b00 :forward1_d;
+    assign forward1_d = (writeSpecReg_a_MEMWB[1:0] != 2'b00) ? 2'b10: forward1_maybeMEM;
     assign forward1_maybeMEM = (registerToWriteId_a_MEMWB[2:0] ==  Rx_a_IDEX[2:0]) ? 2'b10: 2'b00;
     
 

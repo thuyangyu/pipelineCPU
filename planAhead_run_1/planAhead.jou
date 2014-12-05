@@ -1,0 +1,10 @@
+#-----------------------------------------------------------
+# PlanAhead v14.6
+# Build 269223 by xbuild on Wed Jun  5 11:17:50 MDT 2013
+# Start of session at: Thu Dec 04 22:04:03 2014
+# Process ID: 3700
+# Log file: D:/link/computerOrganization/homeworks/pipelineCPU/planAhead_run_1/planAhead.log
+# Journal file: D:/link/computerOrganization/homeworks/pipelineCPU/planAhead_run_1/planAhead.jou
+#-----------------------------------------------------------
+start_gui
+source D:/link/computerOrganization/homeworks/pipelineCPU/pa.fromNetlist.tcl
