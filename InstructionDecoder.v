@@ -391,7 +391,7 @@ case(instruction[15:11])
     
     5'b11010:
         begin
-        //SW_IP
+        //SW_SP
             imSelector = 4'b1000;
             ALUSrc2 = 2'b01;
             memWrite = 2'b10;
@@ -405,7 +405,7 @@ case(instruction[15:11])
             writeSpecReg = 2'b00;
             jump = 1'b0;
             ALUSrc1 = 2'b00;
-            rxToMem = 1'b0;
+            rxToMem = 1'b1;
         end
     
     5'b11011:
@@ -754,7 +754,9 @@ case(instruction[15:11])
                     ALUSrc1 = 2'b00;
                     rxToMem = 1'b0;
 					end
-        endcase       
+        endcase
+   
+    
  default: 
 					begin
 					imSelector = 4'b0000;
