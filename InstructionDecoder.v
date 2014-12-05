@@ -3,27 +3,28 @@
 module InstructionDecoder(
 	//rx express 10 to 8 bit in instruction, ry express 7 to 5 bit, rz express 4 to 2;
     input  [15:0] instruction,	
-    output reg[3:0] imSelector,
-    output reg[1:0] ALUSrc2,
-    output reg[1:0] memWrite,
-    output reg[1:0] memRead,
-    output reg[1:0]regDst,   
-	output reg branch, 
-	output reg regWrite,
-	output reg memToReg,
-	output reg [3:0]op,
-	output reg [1:0]readSpecReg,
-	output reg[1:0]writeSpecReg,
+    output reg [3:0] imSelector,
+    output reg [1:0] ALUSrc2,
+    output reg [1:0] memWrite,
+    output reg [1:0] memRead,
+    output reg [1:0]regDst,   
+	output reg  branch, 
+	output reg  regWrite,
+	output reg  memToReg,
+	output reg  [3:0]op,
+	output reg  [1:0]readSpecReg,
+	output reg [1:0]writeSpecReg,
 	output reg jump,     
 	output reg [1:0]ALUSrc1,
 	output reg rxToMem
 	
     );
     
-always @(instruction)
+always @(*)
 begin
 
 case(instruction[15:11])
+
     5'b00001:  
         begin
         if(instruction[10:0] == 11'b0000_0000_000)
@@ -38,14 +39,29 @@ case(instruction[15:11])
             regWrite = 1'b0;
             memToReg = 1'b0;
             op = 4'b0000;
-            readSpecReg = 4'b00;
+            readSpecReg = 2'b00;
             writeSpecReg = 2'b00;
             jump = 1'b0;
             ALUSrc1 = 2'b00;
             rxToMem = 1'b0;
-
             end
-
+		else 
+			begin
+				  imSelector = 4'b0000;
+                  ALUSrc2 = 2'b00;
+                  memWrite = 2'b00;
+                  memRead = 2'b00;
+                  regDst = 2'b00;
+                  branch = 1'b0;
+                  regWrite = 1'b0;
+                  memToReg = 1'b0;
+                  op = 4'b0000;
+                  readSpecReg = 2'b00;
+                  writeSpecReg = 2'b00;
+                  jump = 1'b0;
+                  ALUSrc1 = 2'b00;
+                  rxToMem = 1'b0;
+			end
         end
         
     5'b00010:
@@ -60,7 +76,7 @@ case(instruction[15:11])
             regWrite = 1'b0;
             memToReg = 1'b0;
             op = 4'b1000;
-            readSpecReg = 4'b00;
+            readSpecReg = 2'b00;
             writeSpecReg = 2'b00;
             jump = 1'b0;
             ALUSrc1 = 2'b00;
@@ -79,7 +95,7 @@ case(instruction[15:11])
             regWrite = 1'b0;
             memToReg = 1'b0;
             op = 4'b1001;
-            readSpecReg = 4'b00;
+            readSpecReg = 2'b00;
             writeSpecReg = 2'b00;
             jump = 1'b0;
             ALUSrc1 = 2'b00;
@@ -98,7 +114,7 @@ case(instruction[15:11])
             regWrite = 1'b0;
             memToReg = 1'b0;
             op = 4'b1010;
-            readSpecReg = 4'b00;
+            readSpecReg = 2'b00;
             writeSpecReg = 2'b00;
             jump = 1'b0;
             ALUSrc1 = 2'b00;
@@ -119,7 +135,7 @@ case(instruction[15:11])
                     regWrite = 1'b1;
                     memToReg = 1'b0;
                     op = 4'b0110;
-                    readSpecReg = 4'b00;
+                    readSpecReg = 2'b00;
                     writeSpecReg = 2'b00;
                     jump = 1'b0;
                     ALUSrc1 = 2'b10;
@@ -138,12 +154,29 @@ case(instruction[15:11])
                     regWrite = 1'b1;
                     memToReg = 1'b0;
                     op = 4'b0101;
-                    readSpecReg = 4'b00;
+                    readSpecReg = 2'b00;
                     writeSpecReg = 2'b00;
                     jump = 1'b0;
                     ALUSrc1 = 2'b10;
                     rxToMem = 1'b0;
                 end
+				default: 
+					begin
+						  imSelector = 4'b0000;
+                    ALUSrc2 = 2'b00;
+                    memWrite = 2'b00;
+                    memRead = 2'b00;
+                    regDst = 2'b00;
+                    branch = 1'b0;
+                    regWrite = 1'b0;
+                    memToReg = 1'b0;
+                    op = 4'b0000;
+                    readSpecReg = 2'b00;
+                    writeSpecReg = 2'b00;
+                    jump = 1'b0;
+                    ALUSrc1 = 2'b00;
+                    rxToMem = 1'b0;
+					end
         endcase
         
     5'b01000:
@@ -158,7 +191,7 @@ case(instruction[15:11])
             regWrite = 1'b1;
             memToReg = 1'b0;
             op = 4'b0000;
-            readSpecReg = 4'b00;
+            readSpecReg = 2'b00;
             writeSpecReg = 2'b00;
             jump = 1'b0;
             ALUSrc1 = 2'b00;
@@ -177,7 +210,7 @@ case(instruction[15:11])
             regWrite = 1'b1;
             memToReg = 1'b0;
             op = 4'b0000;
-            readSpecReg = 4'b00;
+            readSpecReg = 2'b00;
             writeSpecReg = 2'b00;
             jump = 1'b0;
             ALUSrc1 = 2'b00;
@@ -198,7 +231,7 @@ case(instruction[15:11])
                     regWrite = 1'b1;
                     memToReg = 1'b0;
                     op = 4'b0000;
-                    readSpecReg = 4'b01;
+                    readSpecReg = 2'b01;
                     writeSpecReg = 2'b01;
                     jump = 1'b0;
                     ALUSrc1 = 2'b00;
@@ -216,7 +249,7 @@ case(instruction[15:11])
                     regWrite = 1'b0;
                     memToReg = 1'b0;
                     op = 4'b1001;
-                    readSpecReg = 4'b11;
+                    readSpecReg = 2'b11;
                     writeSpecReg = 2'b00;
                     jump = 1'b0;
                     ALUSrc1 = 2'b00;
@@ -235,12 +268,47 @@ case(instruction[15:11])
                     regWrite = 1'b1;
                     memToReg = 1'b0;
                     op = 4'b1001;
-                    readSpecReg = 4'b00;
+                    readSpecReg = 2'b00;
                     writeSpecReg = 2'b01;
                     jump = 1'b0;
                     ALUSrc1 = 2'b00;
                     rxToMem = 1'b0;
-                end    
+                end
+				else 
+				begin
+					imSelector = 4'b0000;
+					ALUSrc2 = 2'b00;
+					memWrite = 2'b00;
+					memRead = 2'b00;
+					regDst = 2'b00;
+					branch = 1'b0;
+					regWrite = 1'b0;
+					memToReg = 1'b0;
+					op = 4'b0000;
+					readSpecReg = 2'b00;
+					writeSpecReg = 2'b00;
+					jump = 1'b0;
+					ALUSrc1 = 2'b00;
+					rxToMem = 1'b0;
+				end
+					 
+				default: 
+					begin
+						  imSelector = 4'b0000;
+                    ALUSrc2 = 2'b00;
+                    memWrite = 2'b00;
+                    memRead = 2'b00;
+                    regDst = 2'b00;
+                    branch = 1'b0;
+                    regWrite = 1'b0;
+                    memToReg = 1'b0;
+                    op = 4'b0000;
+                    readSpecReg = 2'b00;
+                    writeSpecReg = 2'b00;
+                    jump = 1'b0;
+                    ALUSrc1 = 2'b00;
+                    rxToMem = 1'b0;
+					end
                 
             
         endcase
@@ -257,7 +325,7 @@ case(instruction[15:11])
             regWrite = 1'b1;
             memToReg = 1'b0;
             op = 4'b1100;
-            readSpecReg = 4'b00;
+            readSpecReg = 2'b00;
             writeSpecReg = 2'b00;
             jump = 1'b0;
             ALUSrc1 = 2'b00;
@@ -276,7 +344,7 @@ case(instruction[15:11])
             regWrite = 1'b1;
             memToReg = 1'b0;
             op = 4'b1011;
-            readSpecReg = 4'b00;
+            readSpecReg = 2'b00;
             writeSpecReg = 2'b11;
             jump = 1'b0;
             ALUSrc1 = 2'b00;
@@ -295,7 +363,7 @@ case(instruction[15:11])
             regWrite = 1'b1;
             memToReg = 1'b1;
             op = 4'b0000;
-            readSpecReg = 4'b01;
+            readSpecReg = 2'b01;
             writeSpecReg = 2'b00;
             jump = 1'b0;
             ALUSrc1 = 2'b00;
@@ -314,7 +382,7 @@ case(instruction[15:11])
             regWrite = 1'b1;
             memToReg = 1'b1;
             op = 4'b0000;
-            readSpecReg = 4'b00;
+            readSpecReg = 2'b00;
             writeSpecReg = 2'b00;
             jump = 1'b0;
             ALUSrc1 = 2'b00;
@@ -333,7 +401,7 @@ case(instruction[15:11])
             regWrite = 1'b0;
             memToReg = 1'b0;
             op = 4'b0000;
-            readSpecReg = 4'b01;
+            readSpecReg = 2'b01;
             writeSpecReg = 2'b00;
             jump = 1'b0;
             ALUSrc1 = 2'b00;
@@ -352,7 +420,7 @@ case(instruction[15:11])
             regWrite = 1'b0;
             memToReg = 1'b0;
             op = 4'b0000;
-            readSpecReg = 4'b00;
+            readSpecReg = 2'b00;
             writeSpecReg = 2'b00;
             jump = 1'b0;
             ALUSrc1 = 2'b00;
@@ -373,7 +441,7 @@ case(instruction[15:11])
                 regWrite = 1'b1;
                 memToReg = 1'b0;
                 op = 4'b0000;
-                readSpecReg = 4'b00;
+                readSpecReg = 2'b00;
                 writeSpecReg = 2'b00;
                 jump = 1'b0;
                 ALUSrc1 = 2'b00;
@@ -392,12 +460,30 @@ case(instruction[15:11])
                 regWrite = 1'b1;
                 memToReg = 1'b0;
                 op = 4'b0001;
-                readSpecReg = 4'b00;
+                readSpecReg = 2'b00;
                 writeSpecReg = 2'b00;
                 jump = 1'b0;
                 ALUSrc1 = 2'b00;
                 rxToMem = 1'b0;
             end
+				
+				default: 
+					begin
+						  imSelector = 4'b0000;
+                    ALUSrc2 = 2'b00;
+                    memWrite = 2'b00;
+                    memRead = 2'b00;
+                    regDst = 2'b00;
+                    branch = 1'b0;
+                    regWrite = 1'b0;
+                    memToReg = 1'b0;
+                    op = 4'b0000;
+                    readSpecReg = 2'b00;
+                    writeSpecReg = 2'b00;
+                    jump = 1'b0;
+                    ALUSrc1 = 2'b00;
+                    rxToMem = 1'b0;
+					end
         endcase
     
     5'b11101:
@@ -414,7 +500,7 @@ case(instruction[15:11])
                 regWrite = 1'b1;
                 memToReg = 1'b0;
                 op = 4'b0010;
-                readSpecReg = 4'b00;
+                readSpecReg = 2'b00;
                 writeSpecReg = 2'b00;
                 jump = 1'b0;
                 ALUSrc1 = 2'b00;
@@ -433,7 +519,7 @@ case(instruction[15:11])
                 regWrite = 1'b1;
                 memToReg = 1'b0;
                 op = 4'b1011;
-                readSpecReg = 4'b00;
+                readSpecReg = 2'b00;
                 writeSpecReg = 2'b11;
                 jump = 1'b0;
                 ALUSrc1 = 2'b00;
@@ -454,7 +540,7 @@ case(instruction[15:11])
                     regWrite = 1'b0;
                     memToReg = 1'b0;
                     op = 4'b1001;
-                    readSpecReg = 4'b00;
+                    readSpecReg = 2'b00;
                     writeSpecReg = 2'b00;
                     jump = 1'b1;
                     ALUSrc1 = 2'b00;
@@ -472,12 +558,30 @@ case(instruction[15:11])
                     regWrite = 1'b1;
                     memToReg = 1'b0;
                     op = 4'b1001;
-                    readSpecReg = 4'b00;
+                    readSpecReg = 2'b00;
                     writeSpecReg = 2'b00;
                     jump = 1'b0;
                     ALUSrc1 = 2'b01;
                     rxToMem = 1'b0;
                 end
+					 
+					 default: 
+					begin
+						  imSelector = 4'b0000;
+                    ALUSrc2 = 2'b00;
+                    memWrite = 2'b00;
+                    memRead = 2'b00;
+                    regDst = 2'b00;
+                    branch = 1'b0;
+                    regWrite = 1'b0;
+                    memToReg = 1'b0;
+                    op = 4'b0000;
+                    readSpecReg = 2'b00;
+                    writeSpecReg = 2'b00;
+                    jump = 1'b0;
+                    ALUSrc1 = 2'b00;
+                    rxToMem = 1'b0;
+					end
             endcase
             
             5'b01111:
@@ -492,7 +596,7 @@ case(instruction[15:11])
                 regWrite = 1'b1;
                 memToReg = 1'b0;
                 op = 4'b0100;
-                readSpecReg = 4'b00;
+                readSpecReg = 2'b00;
                 writeSpecReg = 2'b00;
                 jump = 1'b0;
                 ALUSrc1 = 2'b00;
@@ -511,7 +615,7 @@ case(instruction[15:11])
                 regWrite = 1'b1;
                 memToReg = 1'b0;
                 op = 4'b0011;
-                readSpecReg = 4'b00;
+                readSpecReg = 2'b00;
                 writeSpecReg = 2'b00;
                 jump = 1'b0;
                 ALUSrc1 = 2'b00;
@@ -530,7 +634,7 @@ case(instruction[15:11])
                 regWrite = 1'b1;
                 memToReg = 1'b0;
                 op = 4'b0110;
-                readSpecReg = 4'b00;
+                readSpecReg = 2'b00;
                 writeSpecReg = 2'b00;
                 jump = 1'b0;
                 ALUSrc1 = 2'b10;
@@ -549,7 +653,7 @@ case(instruction[15:11])
                 regWrite = 1'b1;
                 memToReg = 1'b0;
                 op = 4'b0111;
-                readSpecReg = 4'b00;
+                readSpecReg = 2'b00;
                 writeSpecReg = 2'b11;
                 jump = 1'b0;
                 ALUSrc1 = 2'b00;
@@ -568,12 +672,30 @@ case(instruction[15:11])
                 regWrite = 1'b1;
                 memToReg = 1'b0;
                 op = 4'b0101;
-                readSpecReg = 4'b00;
+                readSpecReg = 2'b00;
                 writeSpecReg = 2'b00;
                 jump = 1'b0;
                 ALUSrc1 = 2'b10;
                 rxToMem = 1'b0;
             end
+				
+				default: 
+					begin
+						  imSelector = 4'b0000;
+                    ALUSrc2 = 2'b00;
+                    memWrite = 2'b00;
+                    memRead = 2'b00;
+                    regDst = 2'b00;
+                    branch = 1'b0;
+                    regWrite = 1'b0;
+                    memToReg = 1'b0;
+                    op = 4'b0000;
+                    readSpecReg = 2'b00;
+                    writeSpecReg = 2'b00;
+                    jump = 1'b0;
+                    ALUSrc1 = 2'b00;
+                    rxToMem = 1'b0;
+					end
         endcase
     
     5'b11110:
@@ -590,7 +712,7 @@ case(instruction[15:11])
                 regWrite = 1'b1;
                 memToReg = 1'b0;
                 op = 4'b1001;
-                readSpecReg = 4'b00;
+                readSpecReg = 2'b00;
                 writeSpecReg = 2'b10;
                 jump = 1'b0;
                 ALUSrc1 = 2'b00;
@@ -609,14 +731,47 @@ case(instruction[15:11])
                 regWrite = 1'b1;
                 memToReg = 1'b0;
                 op = 4'b1001;
-                readSpecReg = 4'b00;
+                readSpecReg = 2'b00;
                 writeSpecReg = 2'b10;
                 jump = 1'b0;
                 ALUSrc1 = 2'b00;
                 rxToMem = 1'b0;
             end
+				default: 
+					begin
+						  imSelector = 4'b0000;
+                    ALUSrc2 = 2'b00;
+                    memWrite = 2'b00;
+                    memRead = 2'b00;
+                    regDst = 2'b00;
+                    branch = 1'b0;
+                    regWrite = 1'b0;
+                    memToReg = 1'b0;
+                    op = 4'b0000;
+                    readSpecReg = 2'b00;
+                    writeSpecReg = 2'b00;
+                    jump = 1'b0;
+                    ALUSrc1 = 2'b00;
+                    rxToMem = 1'b0;
+					end
         endcase       
-        
+ default: 
+					begin
+					imSelector = 4'b0000;
+                    ALUSrc2 = 2'b00;
+                    memWrite = 2'b00;
+                    memRead = 2'b00;
+                    regDst = 2'b00;
+                    branch = 1'b0;
+                    regWrite = 1'b0;
+                    memToReg = 1'b0;
+                    op = 4'b0000;
+                    readSpecReg = 2'b00;
+                    writeSpecReg = 2'b00;
+                    jump = 1'b0;
+                    ALUSrc1 = 2'b00;
+                    rxToMem = 1'b0;
+					end
 endcase    
 end  
     

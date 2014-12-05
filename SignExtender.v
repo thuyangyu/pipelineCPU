@@ -51,6 +51,8 @@ begin
                 ExtendedImmediateOut[15:3] = 13'b0_0000_0000_0000;
             end
         end
+		  default:
+          ExtendedImmediateOut[15:0] = 16'b0;
         endcase
     end
 
@@ -79,12 +81,14 @@ begin
             ExtendedImmediateOut[15:0] = { {13{instruction[4]}},instruction[4:2]};
         end
         //the 4'b1101 case will not happen in the real code
-
+		  default:
+          ExtendedImmediateOut[15:0] = 16'b0;
+		  
         endcase
     end
+	 default:
+          ExtendedImmediateOut[15:0] = 16'b0;
     endcase
-
-
 end
 
 

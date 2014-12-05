@@ -131,9 +131,9 @@ module PipelineCPU(
 	wire memToReg_a_MEMWB;
 	wire regWrite_a_MEMWB;
 	
-	wire [15:0] dataOut_a_MEMWB;
+	wire [15:0] data_a_MEMWB;
 	wire [15:0] ALUResult_a_MEMWB;
-	wire [3:0] registerToWriteId_a_MEMWB;
+	wire [2:0] registerToWriteId_a_MEMWB;
 	
 	wire [15:0] dataToWriteBack;
 
@@ -312,9 +312,9 @@ module PipelineCPU(
 		//input
 		.writeSpecRegIn(writeSpecReg_a_IDEX),
 		.memtoRegIn(memToReg_a_IDEX),
-		.regWriteIn(regWrite_a_IDEX),
+		.regWriteIn(regWrite_b_EXMEM), //mux
 		.memReadIn(memRead_a_IDEX),
-		.memWriteIn(memWrite_a_IDEX),
+		.memWriteIn(memWrite_b_EXMEM), //mux
 		.branchIn(branch_a_IDEX),
 		.PCIn(PC_b_EXMEM),
 		

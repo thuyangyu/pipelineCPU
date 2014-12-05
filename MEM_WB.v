@@ -25,8 +25,5 @@ always @ (posedge CLK)
 		dataOut <= dataIn;
 		ALUResultOut <= ALUResultIn;
 		outRegisterToWriteId <= registerToWriteIdIn;
-	
-	
 	end
-	
 endmodule

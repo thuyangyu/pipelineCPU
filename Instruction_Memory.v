@@ -20,7 +20,6 @@ reg OEBuffer;
 reg WEBuffer;
 reg ENBuffer;
 
-reg [15:0] DATABuffer;
 reg [17:0] ADDRBuffer;
 
 
@@ -46,7 +45,6 @@ begin
         OEBuffer <= 1'b1;
 		WEBuffer <= 1'b1;
 		ENBuffer <= 1'b1;
-        DATABuffer[15:0] <= 16'b0000_1000_0000_0000;//NOP instruction
 		ADDRBuffer[17:0] <= 18'b0;
         
     end

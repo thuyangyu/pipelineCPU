@@ -81,7 +81,9 @@ begin
     begin
         result = second;
     end 
-
+	 
+	 default:
+	     result = 16'b0;
     endcase
 
 end
