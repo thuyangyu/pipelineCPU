@@ -1,6 +1,7 @@
 //ID_EX
 module ID_EX (
 		input CLK,
+		input RST,
 		input [15:0] PCIn, 								//input
 		input [15:0] inData1,    						//input
 		input [15:0] inData2,
@@ -46,7 +47,32 @@ module ID_EX (
 		output reg [2:0] outRz
 	); 
 	
-	always @ (posedge CLK)
+	always @ (posedge CLK, negedge RST)
+	if(!RST)
+	begin
+		PCOut <= 16'b0;
+		outData1 <= 16'b0;
+		outData2 <= 16'b0;
+		outExtendedImmediate <= 16'b0;
+		outRx <= 3'b0;
+		outRy <= 3'b0;
+		outRz <= 3'b0;
+		
+		writeSpecRegOut <= 2'b0;
+		memtoRegOut <= 1'b0;
+		regWriteOut <= 1'b0;
+		memReadOut <= 2'b0;
+		memWriteOut <= 2'b0;
+		jumpOut <= 1'b0;
+		RxToMemOut <= 1'b0;
+	    ALUOpOut <= 4'b0;
+	    ALUSrc1Out <= 2'b0;
+	    ALUSrc2Out <= 2'b0;
+	    regDstOut <= 2'b0;
+	    branchOut <= 1'b0;
+	    readSpecRegOut <= 2'b0;
+	end
+	else
 	begin
 		PCOut <= PCIn;
 		outData1 <= inData1;

@@ -1,6 +1,7 @@
 //MEM_WB
 module MEM_WB(
 	input CLK,
+	input RST,
 	//input
 	input [1:0] writeSpecRegIn,
 	input memtoRegIn,
@@ -17,7 +18,17 @@ module MEM_WB(
 	output reg [2:0] outRegisterToWriteId
 );
 
-always @ (posedge CLK)
+always @ (posedge CLK, negedge RST)
+	if(!RST)
+	begin
+		writeSpecRegOut <= 2'b0;
+		memtoRegOut <= 1'b0;
+		regWriteOut <= 1'b0;
+		dataOut <= 16'b0;
+		ALUResultOut <= 16'b0;
+		outRegisterToWriteId <= 3'b0;
+	end
+	else
 	begin
 		writeSpecRegOut <= writeSpecRegIn;
 		memtoRegOut <= memtoRegIn;
