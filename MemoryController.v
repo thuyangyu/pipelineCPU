@@ -27,10 +27,8 @@ module MemoryController(
 );
 
 parameter 
-	S0 = 4'd0,
-	S1 = 4'd1,
-	S2 = 4'd2,
-	S3 = 4'd3;
+	S0 = 1'd0,
+	S1 = 1'd1;
 	
 	
 wire read;
@@ -47,13 +45,12 @@ assign write = (memWrite[1:0] == 2'b01 || memWrite[1:0] == 2'b10) && (memRead[1:
 assign ram1Data[15:0] = write ? dataIn: 16'bZZZZ_ZZZZ_ZZZZ_ZZZZ;//choose between write and read
 
 
-reg state;//you can not assign the register value outside of the always block
-reg nextState;
+reg  state;//you can not assign the register value outside of the always block
+reg  nextState;
 
 always @ (posedge CLK, negedge RST)
 begin
     if(!RST)begin
-
         ram1OE <= 1'b1;
 		ram1WE <= 1'b1;
 		ram1EN <= 1'b1;
@@ -64,64 +61,94 @@ begin
     end
     else begin
         case(state)
-        S0:begin
-            if(read)begin
-				if(!address[15:0] == 16'hBF00)
-					begin
-						wrn <= 1'b1;
-						rdn <= 1'b1;
-					end
-				else 
-					begin
-						ram1OE <= 1'b1;
-						ram1WE <= 1'b1;
-						ram1EN <= 1'b0;//chip is always enabled, except reset
-						ram1Addr[17:0] <= {2'b00, address[15:0]};
-					end
-            end 
-			else if(write) begin
-                ram1OE <= 1'b1;
-                ram1WE <= 1'b1;
-                ram1EN <= 1'b0;//chip is always enabled, except reset
-                ram1Addr[17:0] <= {2'b00, address[15:0]};
-            end
+        S0:
+		begin
+			case(address)
+				16'hBF00:
+					ram1EN <= 1'b1;
+				16'hBF01:
+					ram1EN <= 1'b1;
+				default:
+					ram1EN <= 1'b0;
+			endcase
+			wrn <= 1'b1;
+			rdn <= 1'b1;
+			ram1OE <= 1'b1;
+            ram1WE <= 1'b1;
+			ram1Addr[17:0] <= {2'b00, address[15:0]};
 			nextState <= S1;
         end
         
-        S1:begin
+        S1:
+		begin
             if(read)begin
-				
-				if(!address[15:0] == 16'hBF00)
-					begin
-						wrn <= 1'b1;
-						rdn <= 1'b0;
-					end
-				else 
-					begin
-						ram1OE <= 1'b0;//enable the read
-						ram1WE <= 1'b1;
-						ram1EN <= 1'b0;
-						ram1Addr[17:0] <= {2'b00, address[15:0]};
-						dataOut[15:0] = ram1Data[15:0];
-					end
-            end else if(write) begin
-                ram1OE <= 1'b1;
-                ram1WE <= 1'b0;//enable the write
-                ram1EN <= 1'b0;
-                ram1Addr[17:0] <= {2'b00, address[15:0]};   
+				case(address)
+						16'hBF00:
+							begin
+								ram1OE <= 1'b1;
+								ram1WE <= 1'b1;
+								ram1EN <= 1'b1;
+								wrn <= 1'b1;
+								rdn <= 1'b0;
+								dataOut[15:0] <= ram1Data[15:0];
+							end
+						16'hBF01:
+							begin
+								
+								ram1OE <= 1'b1;
+								ram1WE <= 1'b1;
+								ram1EN <= 1'b1;
+								wrn <= 1'b1;
+								rdn <= 1'b1;
+								dataOut[15:2] <= 14'b0;
+								dataOut[1] <= data_ready ? 1'b1; 1'b0;
+								dataOut[0] <= (tsre && tbre) ? 1'b1; 1'b0;
+							end
+						default:
+							begin				
+								ram1OE <= 1'b0;//enable the read
+								ram1WE <= 1'b1;
+								ram1EN <= 1'b0;
+								wrn <= 1'b1;
+								rdn <= 1'b1;
+								ram1Addr[17:0] <= {2'b00, address[15:0]};
+								dataOut[15:0] <= ram1Data[15:0];
+							end
+				endcase
+            end 
+			else if(write) 
+			begin
+				case(address)
+						16'hBF00:
+							begin
+								ram1OE <= 1'b1;
+								ram1WE <= 1'b1;
+								ram1EN <= 1'b1;
+								wrn <= 1'b0;
+								rdn <= 1'b1;
+							end
+						16'hBF01:
+							begin
+								//does not need this one
+								ram1OE <= 1'b1;
+								ram1WE <= 1'b1;
+								ram1EN <= 1'b1;
+								wrn <= 1'b0;
+								rdn <= 1'b1;
+							end
+						default:
+							begin
+								wrn <= 1'b1;
+								rdn <= 1'b1;
+								ram1OE <= 1'b1;
+								ram1WE <= 1'b0;//enable the write
+								ram1EN <= 1'b0;
+								ram1Addr[17:0] <= {2'b00, address[15:0]};   
+							end
+				endcase
             end
-            nextState <= S2;
+            nextState <= S0;
         end
-		
-		S2:
-			begin
-			nextState <= S3;
-			end
-			
-		S3:
-			begin
-			nextState <= S0;
-			end
         endcase
     end
 end
