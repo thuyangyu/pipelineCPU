@@ -5,7 +5,7 @@ module Instruction_Memory(
     input CLK,
     input RST,
     input [15:0]address,
-    output reg [15:0] instruction,
+    output [15:0] instruction,
     
     //this actually control the real memory
     output RAM2OE,
@@ -21,17 +21,6 @@ assign RAM2WE = 1'b1;//always disable
 assign RAM2EN = 1'b0;//always enable
 assign RAM2ADDR[17:0] = {2'b0, address[15:0]};
 assign RAM2DATA[15:0] =  16'bZZZZ_ZZZZ_ZZZZ_ZZZZ;
-
-always @ (posedge CLK, negedge RST)
-begin
-    if(!RST)
-        begin
-            instruction[15:0] <= 16'b0000_1000_0000_0000;
-        end
-    else
-        begin
-            instruction[15:0] <= RAM2DATA[15:0];
-        end
-end
+assign instruction [15:0] = RAM2DATA[15:0];
 
 endmodule
