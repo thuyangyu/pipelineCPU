@@ -28,10 +28,10 @@ module PipelineCPU(
     output [2:0] b_topLevelOutForVGA,
     
     //for the button
-    input button
+    input button,
     
     //for SW control 
-    input [3:0] SW;
+    input [3:0] SW
     
 );
 	//wires before PC
@@ -236,8 +236,8 @@ module PipelineCPU(
       .IfIR(instruction_a_IM),
       .registerS({2'b0, forward1}), 
       .registerM({2'b0, forward2}), 
-      .IdRegisterT({2'b0, ALUSrc1}), 
-      .MeRegisterT({2'b0, ALUSrc2}),
+      .IdRegisterT({2'b0, ALUSrc1_a_IDEX}), 
+      .MeRegisterT({2'b0, ALUSrc2_a_IDEX}),
       .ExCalResult(ALUResult_b_EXMEM), 
       .MeCalResult(dataToWriteBack),
       .hs(hs_topLevelOutForVGA), //output for physical
