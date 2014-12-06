@@ -207,14 +207,14 @@ module PipelineCPU(
       .clk(CLK25),//this should be a really quick CLK even using single step 
       .rst(RST),
       .registerVGA(allRegistersDataLine),
-      .IfPC(16'b0001_0001_0001_0001), 
-      .IfIR(16'b0010_0010_0010_0010),
-      .registerS(4'b0011), 
-      .registerM(4'b0100), 
-      .IdRegisterT(4'b0101), 
-      .MeRegisterT(4'b0110),
-      .ExCalResult(16'b0111_0111_0111_0111), 
-      .MeCalResult(16'b1000_1000_1000_1000),
+      .IfPC(PCValue), 
+      .IfIR(instruction_a_IM),
+      .registerS({2'b0, forward1}), 
+      .registerM({2'b0, forward2}), 
+      .IdRegisterT({2'b0, ALUSrc1}), 
+      .MeRegisterT({2'b0, ALUSrc2}),
+      .ExCalResult(ALUResult_b_EXMEM), 
+      .MeCalResult(dataToWriteBack),
       .hs(hs_topLevelOutForVGA), //output for physical
       .vs(vs_topLevelOutForVGA), //output for physical
       .r(r_topLevelOutForVGA),   //output for physical
@@ -249,6 +249,7 @@ module PipelineCPU(
 	//IF_ID
 	IF_ID if_id(
 		.CLK(buttonTriggered_half),
+		.RST(RST),
 		.PCIn(PC_b_IFID), 									//input
 		.instructionIn(instruction_b_IFID),      //input
 		.PCOut(PC_a_IFID),			   				   //output
@@ -321,6 +322,7 @@ module PipelineCPU(
 	//ID_EX
 	ID_EX id_ex(
 		.CLK(buttonTriggered_half),
+		.RST(RST),
 		.PCIn(PC_a_IFID), 					//input
 		.inData1(outData1_a_Registers),    //input
 		.inData2(outData2_a_Registers),
@@ -393,6 +395,7 @@ module PipelineCPU(
 	//EX_MEM
 	EX_MEM ex_mem(
 		.CLK(buttonTriggered_half),
+		.RST(RST),
 		//input
 		.writeSpecRegIn(writeSpecReg_a_IDEX),
 		.memtoRegIn(memToReg_a_IDEX),
@@ -456,6 +459,7 @@ module PipelineCPU(
 	//MEM_WB
 	MEM_WB mem_wb(
 		.CLK(buttonTriggered_half),
+		.RST(RST),
 		//input
 		.writeSpecRegIn(writeSpecReg_a_EXMEM),
 		.memtoRegIn(memToReg_a_EXMEM),
@@ -493,8 +497,11 @@ module PipelineCPU(
 	);
 
 	assign next_PC = PCWrite ? PCValue : (jump_a_IDEX ? outData1Decided : (PCSrc ? PC_a_EXMEM : PCPlus));
-	always @ (posedge buttonTriggered_half)
-		PC <= next_PC;
+	always @ (posedge buttonTriggered_half, negedge RST)
+		if(!RST)
+			PC <= 16'b0;
+		else
+			PC <= next_PC;
         
 
 
