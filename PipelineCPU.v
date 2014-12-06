@@ -200,8 +200,16 @@ module PipelineCPU(
       else
         buttonTriggered_half = ~ buttonTriggered_half;
         
-        
-    
+    //button get reverse, press the button is posedge
+	wire buttonDownToPosedge;
+	assign buttonDownToPosedge = ~button;
+    reg button_half;
+	always @ (posedge buttonDownToPosedge, negedge RST)
+		if(!RST)
+			button_half <= 1'b0;
+		else
+			button_half <= ~button_half;
+			
     //this is the display module, I place it at the beginning
     GraphicCard gc(
       .clk(CLK25),//this should be a really quick CLK even using single step 
@@ -232,7 +240,7 @@ module PipelineCPU(
 	
 	//Instruction_Memory module
     Instruction_Memory im(
-        .CLK(buttonTriggered),
+        .CLK(buttonDownToPosedge),
         .RST(RST),
         .address(PCValue),
         .instruction(instruction_a_IM),
@@ -248,7 +256,7 @@ module PipelineCPU(
 	//modules in IFID stage
 	//IF_ID
 	IF_ID if_id(
-		.CLK(buttonTriggered_half),
+		.CLK(button_half),
 		.RST(RST),
 		.PCIn(PC_b_IFID), 									//input
 		.instructionIn(instruction_b_IFID),      //input
@@ -295,7 +303,7 @@ module PipelineCPU(
 	
 	//Registers
 	Registers registers(
-		.CLK(buttonTriggered_half),
+		.CLK(button_half),
 		.regWrite(regWrite_a_MEMWB),   //RegWrite == 1 express write, == 0 express read;
 		.writeSpecReg(writeSpecReg_a_MEMWB),
 		.readSpecReg(readSpecReg_a_Decoder),
@@ -321,7 +329,7 @@ module PipelineCPU(
 	//modules in ID/EX stage
 	//ID_EX
 	ID_EX id_ex(
-		.CLK(buttonTriggered_half),
+		.CLK(button_half),
 		.RST(RST),
 		.PCIn(PC_a_IFID), 					//input
 		.inData1(outData1_a_Registers),    //input
@@ -394,7 +402,7 @@ module PipelineCPU(
 	//modules in EX/MEM stage
 	//EX_MEM
 	EX_MEM ex_mem(
-		.CLK(buttonTriggered_half),
+		.CLK(button_half),
 		.RST(RST),
 		//input
 		.writeSpecRegIn(writeSpecReg_a_IDEX),
@@ -429,7 +437,7 @@ module PipelineCPU(
 	
 	MemoryController mc(//this is the instruction memory
         //input
-		.CLK(buttonTriggered),
+		.CLK(buttonDownToPosedge),
 		.RST(RST),
         
 		//memory control signal
@@ -458,7 +466,7 @@ module PipelineCPU(
 	//modules in MEM/WB stage
 	//MEM_WB
 	MEM_WB mem_wb(
-		.CLK(buttonTriggered_half),
+		.CLK(button_half),
 		.RST(RST),
 		//input
 		.writeSpecRegIn(writeSpecReg_a_EXMEM),
@@ -497,7 +505,7 @@ module PipelineCPU(
 	);
 
 	assign next_PC = PCWrite ? PCValue : (jump_a_IDEX ? outData1Decided : (PCSrc ? PC_a_EXMEM : PCPlus));
-	always @ (posedge buttonTriggered_half, negedge RST)
+	always @ (posedge button_half, negedge RST)
 		if(!RST)
 			PC <= 16'b0;
 		else

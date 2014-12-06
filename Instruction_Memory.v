@@ -61,7 +61,7 @@ begin
             ENBuffer <= 1'b0;//the 0 is enable
             WEBuffer <= 1'b1;
             OEBuffer <= 1'b0;
-            ADDRBuffer[15:0] <= address[15:0];
+            //ADDRBuffer[15:0] <= address[15:0];
             instruction[15:0] <= RAM2DATA[15:0]; 
             
         end
