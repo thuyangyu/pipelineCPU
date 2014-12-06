@@ -221,7 +221,7 @@ case(instruction[15:11])
         case(instruction[10:8])
             3'b011:
                 begin
-                    //ADDSP3
+                    //ADDSP
                     imSelector = 4'b1000;
                     ALUSrc2 = 2'b01;
                     memWrite = 2'b00;
@@ -432,11 +432,11 @@ case(instruction[15:11])
             2'b01:
             begin
                 //ADDU
-                imSelector = 4'b1000;
-                ALUSrc2 = 2'b01;
+                imSelector = 4'b0000;
+                ALUSrc2 = 2'b00;
                 memWrite = 2'b00;
                 memRead = 2'b00;
-                regDst = 2'b00;
+                regDst = 2'b10;
                 branch = 1'b0;
                 regWrite = 1'b1;
                 memToReg = 1'b0;
@@ -712,8 +712,8 @@ case(instruction[15:11])
                 regWrite = 1'b1;
                 memToReg = 1'b0;
                 op = 4'b1001;
-                readSpecReg = 2'b00;
-                writeSpecReg = 2'b10;
+                readSpecReg = 2'b10;
+                writeSpecReg = 2'b00;
                 jump = 1'b0;
                 ALUSrc1 = 2'b00;
                 rxToMem = 1'b0;
