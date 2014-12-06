@@ -256,7 +256,7 @@ module PipelineCPU(
 	//modules in IFID stage
 	//IF_ID
 	IF_ID if_id(
-		.CLK(button_half),
+		.CLK(buttonDownToPosedge),
 		.RST(RST),
 		.PCIn(PC_b_IFID), 									//input
 		.instructionIn(instruction_b_IFID),      //input
@@ -303,7 +303,7 @@ module PipelineCPU(
 	
 	//Registers
 	Registers registers(
-		.CLK(button_half),
+		.CLK(buttonDownToPosedge),
 		.regWrite(regWrite_a_MEMWB),   //RegWrite == 1 express write, == 0 express read;
 		.writeSpecReg(writeSpecReg_a_MEMWB),
 		.readSpecReg(readSpecReg_a_Decoder),
@@ -329,7 +329,7 @@ module PipelineCPU(
 	//modules in ID/EX stage
 	//ID_EX
 	ID_EX id_ex(
-		.CLK(button_half),
+		.CLK(buttonDownToPosedge),
 		.RST(RST),
 		.PCIn(PC_a_IFID), 					//input
 		.inData1(outData1_a_Registers),    //input
@@ -402,7 +402,7 @@ module PipelineCPU(
 	//modules in EX/MEM stage
 	//EX_MEM
 	EX_MEM ex_mem(
-		.CLK(button_half),
+		.CLK(buttonDownToPosedge),
 		.RST(RST),
 		//input
 		.writeSpecRegIn(writeSpecReg_a_IDEX),
@@ -466,7 +466,7 @@ module PipelineCPU(
 	//modules in MEM/WB stage
 	//MEM_WB
 	MEM_WB mem_wb(
-		.CLK(button_half),
+		.CLK(buttonDownToPosedge),
 		.RST(RST),
 		//input
 		.writeSpecRegIn(writeSpecReg_a_EXMEM),
@@ -505,7 +505,7 @@ module PipelineCPU(
 	);
 
 	assign next_PC = PCWrite ? PCValue : (jump_a_IDEX ? outData1Decided : (PCSrc ? PC_a_EXMEM : PCPlus));
-	always @ (posedge button_half, negedge RST)
+	always @ (posedge buttonDownToPosedge, negedge RST)
 		if(!RST)
 			PC <= 16'b0;
 		else
