@@ -158,7 +158,7 @@ module PipelineCPU(
 	//************************************* start attachment
     
     // deal with the frequency division,added code
-    reg CLK25, CLK12;
+    reg CLK25, CLK12,CLK6;
 
     always @ (posedge CLK, negedge RST)
     begin
@@ -173,6 +173,12 @@ module PipelineCPU(
         CLK12 = 0;
       else
         CLK12 = ~ CLK12;
+        
+    always @ (posedge CLK12 or negedge RST)
+      if (!RST)
+        CLK6 = 0;
+      else
+        CLK6 = ~ CLK6;
          
 
     //add to deal with the button triggered
@@ -221,46 +227,14 @@ module PipelineCPU(
     //2'b10:CLK12
     //2'b01:CLK25
     //2'b00:CLK
-    wire CPU_CLK = SW[3] ? (SW[2]? buttonDownToPosedge: CLK12) : (SW[2]? CLK25: CLK); 
+    wire CPU_CLK_double = SW[3] ? (SW[2]? buttonDownToPosedge: CLK12) : (SW[2]? CLK25: CLK);
+    wire CPU_CLK = SW[3] ? (SW[2]? button_half: CLK6) : (SW[2]? CLK12: CLK25);
     
     //-------------------------------------------------------
 	//-----------------------begin the modules---------------------
     //-------------------------------------------------------
    
-    wire tmpMemRead = memRead_a_EXMEM[1] | memRead_a_EXMEM[0];
-    wire tmpMemWrite = memWrite_a_EXMEM[1] | memWrite_a_EXMEM[0];//change the two bits into one bit
-    wire noUse;
-    Ram ram(
-    .CLK(CPU_CLK),
-    .RST(RST),
-    .boot(1'b0),
-    .addrin(ALUResult_a_EXMEM),
-    .datain(data_a_EXMEM),
-    .MemRead(tmpMemRead),
-    .MemWrite(tmpMemWrite),
-    .pc(PCValue),	
-	.tbre(tbre), 
-    .tsre(tsre), 
-    .data_ready(data_ready),
-	.rdn(rdn), 
-    .wrn(wrn),
-    .ram1_en(ram1EN), 
-    .ram2_en(ram2EN),
-	.ram1_oe(ram1OE), 
-    .ram1_rw(ram1WE),
-    .ram2_oe(ram2OE), 
-    .ram2_rw(ram2WE),
-    .ram1_addr(ram1Addr),
-    .ram2_addr(ram2Addr),
-    .instruction(instruction_a_IM),
-    .dataout(data_a_MemController),
-    .RamSlot(noUse),
-    .ram1_data(ram1Data),
-    .ram2_data(ram2Data)
-    );
-    
-    
-    
+ 
     //this is the display module, I place it at the beginning
     GraphicCard gc(
       .clk(CLK25),//this should be a really quick CLK even using single step, should always be clk25
@@ -290,8 +264,9 @@ module PipelineCPU(
 	assign instruction_b_IFID[15:0] = IFIDWrite ? instruction_a_IFID[15:0] : ((jump_a_IDEX || PCSrc) ? 16'b0000_1000_0000_0000 : instruction_a_IM[15:0]);
 	
 	//Instruction_Memory module
-    /*Instruction_Memory im(
-        .CLK(CPU_CLK),
+    Instruction_Memory im(
+        .CLK(CPU_CLK_double),
+        .CLK_half(CPU_CLK),
         .RST(RST),
         .address(PCValue),
         .instruction(instruction_a_IM),
@@ -302,7 +277,7 @@ module PipelineCPU(
         .RAM2EN(ram2EN),
         .RAM2ADDR(ram2Addr),
         .RAM2DATA(ram2Data)
-        );     */
+    );     
 	
 	//modules in IFID stage
 	//IF_ID
@@ -486,9 +461,9 @@ module PipelineCPU(
 	
 	assign PCSrc = branch_a_EXMEM && zerobit_a_EXMEM;
 	
-	/*MemoryController mc(//this is the instruction memory
+	MemoryController mc(//this is the instruction memory
         //input
-		.CLK(CPU_CLK),
+		.CLK(CPU_CLK_double),
 		.RST(RST),
         
 		//memory control signal
@@ -512,7 +487,7 @@ module PipelineCPU(
 		
 		//output
 		.dataOut(data_a_MemController)
-	);*/
+	);
     
 	//modules in MEM/WB stage
 	//MEM_WB

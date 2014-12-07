@@ -16,15 +16,15 @@ module Instruction_Memory(
     inout [15:0] RAM2DATA
 );
 
-wire state1;
+//wire state1;
 wire state2;
 wire state3;
-wire state4;
+//wire state4;
 wire shiftCLK;
-assign state1 = CLK & CLK_half;
+//assign state1 = CLK & CLK_half;
 assign state2 = ~CLK & CLK_half;
 assign state3 = CLK & ~CLK_half;
-assign state4 = ~CLK & ~CLK_half;
+//assign state4 = ~CLK & ~CLK_half;
 assign shiftCLK = state2 | state3;
 
 
