@@ -94,6 +94,7 @@ NET "b_topLevelOutForVGA[0]" LOC = D5;
 NET "b_topLevelOutForVGA[1]" LOC = A6;
 NET "b_topLevelOutForVGA[2]" LOC = B6;
 NET "button" LOC = U9;
+NET "SW[5]" LOC = V2;
 NET "SW[4]" LOC = V3;
 NET "SW[3]" LOC = V4;
 NET "SW[2]" LOC = U8;

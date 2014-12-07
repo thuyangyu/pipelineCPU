@@ -31,7 +31,7 @@ module PipelineCPU(
     input button,
     
     //for SW control 
-    input [4:0] SW
+    input [5:0] SW
     
 );
 	//wires before PC
@@ -204,7 +204,7 @@ module PipelineCPU(
     //2'b010:CLK12
     //2'b001:CLK25
     //2'b000:CLK
-     wire CPU_CLK_wire_1;
+    wire CPU_CLK_wire_1;
     wire CPU_CLK_wire_2;
     wire CPU_CLK_wire_3;
     wire CPU_CLK_wire_4;
@@ -329,7 +329,8 @@ module PipelineCPU(
 	
 	//Registers
 	Registers registers(
-		.CLK(button_half),
+		.CLK(buttonDownToPosedge),
+      .CLK_half(button_half),
 		.regWrite(regWrite_a_MEMWB),   //RegWrite == 1 express write, == 0 express read;
 		.writeSpecReg(writeSpecReg_a_MEMWB),
 		.readSpecReg(readSpecReg_a_Decoder),
