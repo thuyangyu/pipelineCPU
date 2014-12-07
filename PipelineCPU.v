@@ -204,12 +204,20 @@ module PipelineCPU(
     //2'b010:CLK12
     //2'b001:CLK25
     //2'b000:CLK
-    wire CPU_CLK_wire_1;
+     wire CPU_CLK_wire_1;
     wire CPU_CLK_wire_2;
-
-    wire CPU_CLK_double = SW[4] ? CPU_CLK_wire_1:CPU_CLK_wire_2;
+    wire CPU_CLK_wire_3;
+    wire CPU_CLK_wire_4;
+    wire CPU_CLK_wire_5;
+    wire CPU_CLK_wire_6;
+    wire CPU_CLK_double = SW[5] ? CPU_CLK_wire_3: CPU_CLK_wire_4;
+    assign CPU_CLK_wire_4 = SW[4] ? CPU_CLK_wire_1:CPU_CLK_wire_2;
     assign CPU_CLK_wire_1 = SW[3] ? (SW[2]? CLKCounter[15]: CLKCounter[21]) : (SW[2]? CLKCounter[24]: CLKCounter[19]);
-    assign CPU_CLK_wire_2 = SW[3] ? (SW[2]? button: CLKCounter[1]) :(SW[2]? CLKCounter[0]: CLK);
+    assign CPU_CLK_wire_2 = SW[3] ? (SW[2]? button: CLKCounter[1]) : (SW[2]? CLKCounter[0]: CLK);
+    
+    assign CPU_CLK_wire_3 = SW[4] ? CPU_CLK_wire_5:CPU_CLK_wire_6;
+    assign CPU_CLK_wire_5 = SW[3] ? (SW[2]? CLKCounter[2]: CLKCounter[3]) : (SW[2]? CLKCounter[5]: CLKCounter[6]);
+    assign CPU_CLK_wire_6 = SW[3] ? (SW[2]? CLKCounter[8]: CLKCounter[9]) : (SW[2]? CLKCounter[11]: CLKCounter[14]);
 	
 	//button get reverse, press the button is posedge
 	wire buttonDownToPosedge;
