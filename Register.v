@@ -24,7 +24,7 @@ reg [15:0] registerT;
 //show the data of all the register
 assign allRegistersDataToShow[175:0] = {generalRegister[0][15:0],generalRegister[1][15:0],generalRegister[2][15:0],generalRegister[3][15:0],generalRegister[4][15:0],generalRegister[5][15:0],generalRegister[6][15:0],generalRegister[7][15:0],registerSP[15:0],registerIH[15:0],registerT[15:0]};
 
-always @ (negedge CLK) // we write the data into specific reg in the negedge
+always @ (negedge CLK_half) // we write the data into specific reg in the negedge
 begin
     if(regWrite)
     begin //only when it is 1, we write the value of the registers

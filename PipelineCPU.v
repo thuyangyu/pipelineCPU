@@ -336,7 +336,7 @@ module PipelineCPU(
 		.readSpecReg(readSpecReg_a_Decoder),
 		.R1(instruction_a_IFID[10:8]),
 		.R2(instruction_a_IFID[7:5]),
-		.R3(instruction_a_IFID[4:2]),
+		.R3(registerToWriteId_a_MEMWB),
 		.inData3(dataToWriteBack),
 		.outData1(outData1_a_Registers),
 		.outData2(outData2_a_Registers),
