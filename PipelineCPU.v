@@ -158,34 +158,13 @@ module PipelineCPU(
 	//************************************* start attachment
     
     // deal with the frequency division,added code
-    reg CLK25, CLK12,CLK6;
+
     reg [63:0]CLKCounter;
     always @ (posedge CLK)
     begin
         CLKCounter[63:0] = CLKCounter[63:0] + 64'b1; 
     end
     
-
-    always @ (posedge CLK, negedge RST)
-    begin
-      if (!RST)
-        CLK25 = 0;
-      else
-        CLK25 = ~ CLK25;
-    end
-
-    always @ (posedge CLK25 or negedge RST)
-      if (!RST)
-        CLK12 = 0;
-      else
-        CLK12 = ~ CLK12;
-        
-    always @ (posedge CLK12 or negedge RST)
-      if (!RST)
-        CLK6 = 0;
-      else
-        CLK6 = ~ CLK6;
-         
 
     //add to deal with the button triggered
     reg buttonTriggered;//this is the signal that a button is pushed by the user
@@ -235,14 +214,11 @@ module PipelineCPU(
     //2'b000:CLK
     wire CPU_CLK_wire_1;
     wire CPU_CLK_wire_2;
-    wire CPU_CLK_wire_3;
-    wire CPU_CLK_wire_4;
+
     wire CPU_CLK_double = SW[4] ? CPU_CLK_wire_1:CPU_CLK_wire_2;
     assign CPU_CLK_wire_1 = SW[3] ? (SW[2]? CLKCounter[15]: CLKCounter[21]) : (SW[2]? CLKCounter[24]: CLKCounter[19]);
-    assign CPU_CLK_wire_2 = SW[3] ? (SW[2]? buttonDownToPosedge: CLK12) : (SW[2]? CLK25: CLK);
-    wire CPU_CLK = SW[4] ? CPU_CLK_wire_3:CPU_CLK_wire_4;
-    assign CPU_CLK_wire_3 = SW[3] ? (SW[2]? CLKCounter[16]: CLKCounter[22]) : (SW[2]? CLKCounter[25]: CLKCounter[20]);
-    assign CPU_CLK_wire_4 = SW[3] ? (SW[2]? button_half: CLK6) : (SW[2]? CLK12: CLK25);
+    assign CPU_CLK_wire_2 = SW[3] ? (SW[2]? button: CLKCounter[1]) : (SW[2]? CLKCounter[0]): CLK);
+
     
     
     //-------------------------------------------------------
