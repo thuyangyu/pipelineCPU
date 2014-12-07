@@ -69,6 +69,7 @@ module PipelineCPU(
 	wire [1:0] ALUSrc2_a_Decoder;
 	wire [1:0] regDst_a_Decoder;
 	wire branch_a_Decoder;
+    wire branch_b_IDEX;
 	wire [1:0] readSpecReg_a_Decoder;
 	wire [3:0] imSrcSelect;
 	
@@ -328,7 +329,8 @@ module PipelineCPU(
 	
 	assign memWrite_b_IDEX = (jump || addBubble || PCSrc) ? 2'b0 : memWrite_a_Decoder;
 	assign regWrite_b_IDEX = (jump || addBubble || PCSrc) ? 1'b0 : regWrite_a_Decoder;
-	assign jump_b_IDEX = PCSrc ? 1'b0: jump_a_Decoder;
+	assign jump_b_IDEX = ( addBubble || PCSrc) ? 1'b0: jump_a_Decoder;
+    assign branch_b_IDEX = (jump || addBubble || PCSrc) ? 1'b0 : branch_a_Decoder;
 	//Registers
 	Registers registers(
 		.CLK(buttonDownToPosedge),
@@ -379,7 +381,7 @@ module PipelineCPU(
 		.ALUSrc1In(ALUSrc1_a_Decoder),
 		.ALUSrc2In(ALUSrc2_a_Decoder),
 		.regDstIn(regDst_a_Decoder),
-		.branchIn(branch_a_Decoder),
+		.branchIn(branch_b_IDEX),
 		.readSpecRegIn(readSpecReg_a_Decoder),
 		
 		.writeSpecRegOut(writeSpecReg_a_IDEX),
@@ -405,9 +407,14 @@ module PipelineCPU(
 		.outRz(Rz_a_IDEX)
 	);
 	
-	assign regWrite_b_EXMEM = PCSrc ? 1'b0 : regWrite_a_IDEX;
-	assign memWrite_b_EXMEM = PCSrc ? 2'b0 : memWrite_a_IDEX;
-	assign jump = PCSrc ? 1'b0: jump_a_IDEX;
+    //we want to enable the delay slot, so that we disable these lines
+	//assign regWrite_b_EXMEM = PCSrc ? 1'b0 : regWrite_a_IDEX;
+	//assign memWrite_b_EXMEM = PCSrc ? 2'b0 : memWrite_a_IDEX;
+	//assign jump = PCSrc ? 1'b0: jump_a_IDEX;
+	assign regWrite_b_EXMEM = regWrite_a_IDEX;//we want to enable the delay slot, so that I add these lines
+	assign memWrite_b_EXMEM = memWrite_a_IDEX;//we want to enable the delay slot, so that I add these lines
+	assign jump = jump_a_IDEX;//we want to enable the delay slot, so that I add these lines
+    
 	assign PC_b_EXMEM = PC_a_IDEX + ExtendedImmediate_a_IDEX;
 	assign outData1Decided = forward1[1] ? dataToWriteBack : (forward1[0] ? ALUResult_a_EXMEM : outData1_a_IDEX);
 	assign outData2Decided = forward2[1] ? dataToWriteBack : (forward2[0] ? ALUResult_a_EXMEM : outData2_a_IDEX);
