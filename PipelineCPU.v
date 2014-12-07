@@ -196,15 +196,7 @@ module PipelineCPU(
       else
         buttonTriggered_half = ~ buttonTriggered_half;
         
-    //button get reverse, press the button is posedge
-	wire buttonDownToPosedge;
-	assign buttonDownToPosedge = ~button;  //previous is button
-    reg button_half;
-	always @ (posedge buttonDownToPosedge, negedge RST)
-		if(!RST)
-			button_half <= 1'b0;
-		else
-			button_half <= ~button_half;
+    
             
     //this is the real CPU CLK sent into all the module
     //here the defination of the CPU_CLK_double is: 
@@ -217,8 +209,17 @@ module PipelineCPU(
 
     wire CPU_CLK_double = SW[4] ? CPU_CLK_wire_1:CPU_CLK_wire_2;
     assign CPU_CLK_wire_1 = SW[3] ? (SW[2]? CLKCounter[15]: CLKCounter[21]) : (SW[2]? CLKCounter[24]: CLKCounter[19]);
-    assign CPU_CLK_wire_2 = SW[3] ? (SW[2]? button: CLKCounter[1]) : (SW[2]? CLKCounter[0]): CLK);
-
+    assign CPU_CLK_wire_2 = SW[3] ? (SW[2]? button: CLKCounter[1]) :(SW[2]? CLKCounter[0]: CLK);
+	
+	//button get reverse, press the button is posedge
+	wire buttonDownToPosedge;
+	assign buttonDownToPosedge = ~CPU_CLK_double;  //previous is button
+    reg button_half;
+	always @ (posedge buttonDownToPosedge, negedge RST)
+		if(!RST)
+			button_half <= 1'b0;
+		else
+			button_half <= ~button_half;
     
     
     //-------------------------------------------------------
@@ -228,7 +229,7 @@ module PipelineCPU(
  
     //this is the display module, I place it at the beginning
     GraphicCard gc(
-      .clk(CLK25),//this should be a really quick CLK even using single step, should always be clk25
+      .clk(CLKCounter[0]),//this should be a really quick CLK even using single step, should always be clk25
       .rst(RST),
       .registerVGA(allRegistersDataLine),
       .IfPC(PCValue), 
