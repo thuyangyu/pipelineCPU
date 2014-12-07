@@ -62,6 +62,7 @@ module PipelineCPU(
 	wire [1:0] memRead_a_Decoder;
 	wire [1:0] memWrite_a_Decoder;
 	wire jump_a_Decoder;
+	wire jump_b_IDEX;
 	wire RxToMem_a_Decoder;
 	wire [3:0] ALUOp_a_Decoder;
 	wire [1:0] ALUSrc1_a_Decoder;
@@ -89,6 +90,7 @@ module PipelineCPU(
 	wire regWrite_a_IDEX;
 	wire [1:0] memRead_a_IDEX;
 	wire [1:0] memWrite_a_IDEX;
+	wire jump;
 	wire jump_a_IDEX;
 	wire RxToMem_a_IDEX;
 	wire [3:0] ALUOp_a_IDEX;
@@ -261,7 +263,7 @@ module PipelineCPU(
 	assign PCValue[15:0] = PC[15:0];
 	assign PCPlus[15:0] = PCValue[15:0] + 16'b1;        //temp add 1;
 	assign PC_b_IFID[15:0]               = IFIDWrite ? PC_a_IFID[15:0] : PCPlus[15:0];  //mux
-	assign instruction_b_IFID[15:0] = IFIDWrite ? instruction_a_IFID[15:0] : ((jump_a_IDEX || PCSrc) ? 16'b0000_1000_0000_0000 : instruction_a_IM[15:0]);
+	assign instruction_b_IFID[15:0] = IFIDWrite ? instruction_a_IFID[15:0] : ((jump || PCSrc) ? 16'b0000_1000_0000_0000 : instruction_a_IM[15:0]);
 	
 	//Instruction_Memory module
     Instruction_Memory im(
@@ -324,9 +326,9 @@ module PipelineCPU(
 	.rxToMem(RxToMem_a_Decoder)
     );
 	
-	assign memWrite_b_IDEX = (jump_a_IDEX || addBubble || PCSrc) ? 2'b0 : memWrite_a_Decoder;
-	assign regWrite_b_IDEX = (jump_a_IDEX || addBubble || PCSrc) ? 1'b0 : regWrite_a_Decoder;
-	
+	assign memWrite_b_IDEX = (jump || addBubble || PCSrc) ? 2'b0 : memWrite_a_Decoder;
+	assign regWrite_b_IDEX = (jump || addBubble || PCSrc) ? 1'b0 : regWrite_a_Decoder;
+	assign jump_b_IDEX = PCSrc ? 1'b0: jump_a_Decoder;
 	//Registers
 	Registers registers(
 		.CLK(buttonDownToPosedge),
@@ -371,7 +373,7 @@ module PipelineCPU(
 		.regWriteIn(regWrite_b_IDEX),  //mux before it
 		.memReadIn(memRead_a_Decoder),
 		.memWriteIn(memWrite_b_IDEX),  //mux before it
-		.jumpIn(jump_a_Decoder),
+		.jumpIn(jump_b_IDEX),
 		.RxToMemIn(RxToMem_a_Decoder),
 		.ALUOpIn(ALUOp_a_Decoder),
 		.ALUSrc1In(ALUSrc1_a_Decoder),
@@ -405,6 +407,7 @@ module PipelineCPU(
 	
 	assign regWrite_b_EXMEM = PCSrc ? 1'b0 : regWrite_a_IDEX;
 	assign memWrite_b_EXMEM = PCSrc ? 2'b0 : memWrite_a_IDEX;
+	assign jump = PCSrc ? 1'b0: jump_a_IDEX;
 	assign PC_b_EXMEM = PC_a_IDEX + ExtendedImmediate_a_IDEX;
 	assign outData1Decided = forward1[1] ? dataToWriteBack : (forward1[0] ? ALUResult_a_EXMEM : outData1_a_IDEX);
 	assign outData2Decided = forward2[1] ? dataToWriteBack : (forward2[0] ? ALUResult_a_EXMEM : outData2_a_IDEX);
@@ -532,7 +535,7 @@ module PipelineCPU(
     .forward2(forward2)
 	);
 
-	assign next_PC = PCWrite ? PCValue : (jump_a_IDEX ? outData1Decided : (PCSrc ? PC_a_EXMEM : PCPlus));
+	assign next_PC = PCWrite ? PCValue : (jump ? outData1Decided : (PCSrc ? PC_a_EXMEM : PCPlus));
 	always @ (posedge button_half, negedge RST)
 		if(!RST)
 			PC <= 16'b0;
