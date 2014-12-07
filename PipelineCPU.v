@@ -226,6 +226,40 @@ module PipelineCPU(
     //-------------------------------------------------------
 	//-----------------------begin the modules---------------------
     //-------------------------------------------------------
+   
+    wire tmpMemRead = memRead_a_EXMEM[1] | memRead_a_EXMEM[0];
+    wire tmpMemWrite = memWrite_a_EXMEM[1] | memWrite_a_EXMEM[0];//change the two bits into one bit
+    wire noUse;
+    Ram ram(
+    .CLK(CPU_CLK),
+    .RST(RST),
+    .boot(1'b0),
+    .addrin(ALUResult_a_EXMEM),
+    .datain(data_a_EXMEM),
+    .MemRead(tmpMemRead),
+    .MemWrite(tmpMemWrite),
+    .pc(PCValue),	
+	.tbre(tbre), 
+    .tsre(tsre), 
+    .data_ready(data_ready),
+	.rdn(rdn), 
+    .wrn(wrn),
+    .ram1_en(ram1EN), 
+    .ram2_en(ram2EN),
+	.ram1_oe(ram1OE), 
+    .ram1_rw(ram1WE),
+    .ram2_oe(ram2OE), 
+    .ram2_rw(ram2WE),
+    .ram1_addr(ram1Addr),
+    .ram2_addr(ram2Addr),
+    .instruction(instruction_a_IM),
+    .dataout(data_a_MemController),
+    .RamSlot(noUse),
+    .ram1_data(ram1Data),
+    .ram2_data(ram2Data)
+    );
+    
+    
     
     //this is the display module, I place it at the beginning
     GraphicCard gc(
@@ -256,7 +290,7 @@ module PipelineCPU(
 	assign instruction_b_IFID[15:0] = IFIDWrite ? instruction_a_IFID[15:0] : ((jump_a_IDEX || PCSrc) ? 16'b0000_1000_0000_0000 : instruction_a_IM[15:0]);
 	
 	//Instruction_Memory module
-    Instruction_Memory im(
+    /*Instruction_Memory im(
         .CLK(CPU_CLK),
         .RST(RST),
         .address(PCValue),
@@ -268,7 +302,7 @@ module PipelineCPU(
         .RAM2EN(ram2EN),
         .RAM2ADDR(ram2Addr),
         .RAM2DATA(ram2Data)
-        );     
+        );     */
 	
 	//modules in IFID stage
 	//IF_ID
@@ -452,7 +486,7 @@ module PipelineCPU(
 	
 	assign PCSrc = branch_a_EXMEM && zerobit_a_EXMEM;
 	
-	MemoryController mc(//this is the instruction memory
+	/*MemoryController mc(//this is the instruction memory
         //input
 		.CLK(CPU_CLK),
 		.RST(RST),
@@ -478,7 +512,7 @@ module PipelineCPU(
 		
 		//output
 		.dataOut(data_a_MemController)
-	);
+	);*/
     
 	//modules in MEM/WB stage
 	//MEM_WB
