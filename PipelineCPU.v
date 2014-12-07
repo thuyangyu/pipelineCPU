@@ -69,6 +69,7 @@ module PipelineCPU(
 	wire [1:0] ALUSrc2_a_Decoder;
 	wire [1:0] regDst_a_Decoder;
 	wire branch_a_Decoder;
+	wire branch_b_IDEX;
 	wire [1:0] readSpecReg_a_Decoder;
 	wire [3:0] imSrcSelect;
 	
@@ -329,6 +330,7 @@ module PipelineCPU(
 	assign memWrite_b_IDEX = (jump || addBubble || PCSrc) ? 2'b0 : memWrite_a_Decoder;
 	assign regWrite_b_IDEX = (jump || addBubble || PCSrc) ? 1'b0 : regWrite_a_Decoder;
 	assign jump_b_IDEX = PCSrc ? 1'b0: jump_a_Decoder;
+	assign branch_b_IDEX = (jump || addBubble || PCSrc) ? 1'b0 : branch_a_Decoder;
 	//Registers
 	Registers registers(
 		.CLK(buttonDownToPosedge),
@@ -379,7 +381,7 @@ module PipelineCPU(
 		.ALUSrc1In(ALUSrc1_a_Decoder),
 		.ALUSrc2In(ALUSrc2_a_Decoder),
 		.regDstIn(regDst_a_Decoder),
-		.branchIn(branch_a_Decoder),
+		.branchIn(branch_b_IDEX),
 		.readSpecRegIn(readSpecReg_a_Decoder),
 		
 		.writeSpecRegOut(writeSpecReg_a_IDEX),
