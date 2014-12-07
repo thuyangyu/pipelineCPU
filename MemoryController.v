@@ -2,6 +2,7 @@
 
 module MemoryController(
     input CLK,
+    input CLK_half,
     input RST,
     input [15:0]address,
 	input [15:0]dataIn,
@@ -25,6 +26,20 @@ module MemoryController(
     output reg rdn,
     output reg wrn
 );
+
+
+//wire state1;
+wire state2;
+wire state3;
+//wire state4;
+wire shiftCLK;
+//assign state1 = CLK & CLK_half;
+assign state2 = ~CLK & CLK_half;
+assign state3 = CLK & ~CLK_half;
+//assign state4 = ~CLK & ~CLK_half;
+assign shiftCLK = state2 | state3;
+
+
 
 parameter 
 	S0 = 1'd0,
@@ -57,7 +72,7 @@ begin
 		dataOut[15:0] = ram1Data[15:0];
     end
     else begin
-        case(CLK)  //in negedge of CLK
+        case(shiftCLK)  //in negedge of CLK
         S1:
 			begin
 			case(address)
@@ -76,7 +91,7 @@ begin
             end
         
         S0:
-		  begin
+            begin
             if(read)begin
 				case(address)
 						16'hBF00:

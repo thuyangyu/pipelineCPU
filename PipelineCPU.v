@@ -31,7 +31,7 @@ module PipelineCPU(
     input button,
     
     //for SW control 
-    input [3:0] SW
+    input [4:0] SW
     
 );
 	//wires before PC
@@ -159,6 +159,12 @@ module PipelineCPU(
     
     // deal with the frequency division,added code
     reg CLK25, CLK12,CLK6;
+    reg [63:0]CLKCounter;
+    always @ (posedge CLK)
+    begin
+        CLKCounter[63:0] = CLKCounter[63:0] + 64'b1;
+    end
+    
 
     always @ (posedge CLK, negedge RST)
     begin
@@ -223,12 +229,21 @@ module PipelineCPU(
             
     //this is the real CPU CLK sent into all the module
     //here the defination of the CPU_CLK_double is: 
-    //2'b11:buttonDownToPosedge
-    //2'b10:CLK12
-    //2'b01:CLK25
-    //2'b00:CLK
-    wire CPU_CLK_double = SW[3] ? (SW[2]? buttonDownToPosedge: CLK12) : (SW[2]? CLK25: CLK);
-    wire CPU_CLK = SW[3] ? (SW[2]? button_half: CLK6) : (SW[2]? CLK12: CLK25);
+    //2'b011:buttonDownToPosedge
+    //2'b010:CLK12
+    //2'b001:CLK25
+    //2'b000:CLK
+    wire CPU_CLK_wire_1;
+    wire CPU_CLK_wire_2;
+    wire CPU_CLK_wire_3;
+    wire CPU_CLK_wire_4;
+    wire CPU_CLK_double = SW[4] ? CPU_CLK_wire_1:CPU_CLK_wire_2;
+    assign CPU_CLK_wire_1 = SW[3] ? (SW[2]? CLKCounter[15]: CLKCounter[21]) : (SW[2]? CLKCounter[24]: CLKCounter[19]);
+    assign CPU_CLK_wire_2 = SW[3] ? (SW[2]? buttonDownToPosedge: CLK12) : (SW[2]? CLK25: CLK);
+    wire CPU_CLK = SW[4] ? CPU_CLK_wire_3:CPU_CLK_wire_4;
+    assign CPU_CLK_wire_3 = SW[3] ? (SW[2]? CLKCounter[16]: CLKCounter[22]) : (SW[2]? CLKCounter[25]: CLKCounter[20]);
+    assign CPU_CLK_wire_4 = SW[3] ? (SW[2]? button_half: CLK6) : (SW[2]? CLK12: CLK25);
+    
     
     //-------------------------------------------------------
 	//-----------------------begin the modules---------------------
@@ -463,7 +478,8 @@ module PipelineCPU(
 	
 	MemoryController mc(//this is the instruction memory
         //input
-		.CLK(CPU_CLK),
+		.CLK(CPU_CLK_double),
+        .CLK_half(CPU_CLK),
 		.RST(RST),
         
 		//memory control signal
