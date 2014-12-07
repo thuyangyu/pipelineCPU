@@ -3,6 +3,7 @@
 
 module Instruction_Memory(
     input CLK,
+    input CLK_half,
     input RST,
     input [15:0]address,
     output [15:0] instruction,
@@ -15,8 +16,21 @@ module Instruction_Memory(
     inout [15:0] RAM2DATA
 );
 
+wire state1;
+wire state2;
+wire state3;
+wire state4;
+wire shiftCLK;
+assign state1 = CLK & CLK_half;
+assign state2 = ~CLK & CLK_half;
+assign state3 = CLK & ~CLK_half;
+assign state4 = ~CLK & ~CLK_half;
+assign shiftCLK = state2 | state3;
 
-assign RAM2OE = CLK;
+
+
+
+assign RAM2OE = shiftCLK;
 assign RAM2WE = 1'b1;//always disable
 assign RAM2EN = 1'b0;//always enable
 assign RAM2ADDR[17:0] = {2'b0, address[15:0]};
