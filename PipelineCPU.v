@@ -267,7 +267,7 @@ module PipelineCPU(
 	assign instruction_b_IFID[15:0] = IFIDWrite ? instruction_a_IFID[15:0] : ((jump || PCSrc) ? 16'b0000_1000_0000_0000 : instruction_a_IM[15:0]);
 	
 	//Instruction_Memory module
-    Instruction_Memory im(
+    /*Instruction_Memory im(
         .CLK(buttonDownToPosedge),
         .CLK_half(button_half),
         .RST(RST),
@@ -280,7 +280,7 @@ module PipelineCPU(
         .RAM2EN(ram2EN),
         .RAM2ADDR(ram2Addr),
         .RAM2DATA(ram2Data)
-    );     
+    );*/     
 	
 	//modules in IFID stage
 	//IF_ID
@@ -472,7 +472,7 @@ module PipelineCPU(
 	
 	assign PCSrc = branch_a_EXMEM && zerobit_a_EXMEM;
 	
-	MemoryController mc(//this is the instruction memory
+	/*MemoryController mc(//this is the instruction memory
         //input
 		.CLK(buttonDownToPosedge),
         .CLK_half(button_half),
@@ -499,6 +499,48 @@ module PipelineCPU(
 		
 		//output
 		.dataOut(data_a_MemController)
+	);*/
+    
+    
+    AllInOneRamController mc(//this is the instruction memory
+        //input
+		.CLK(buttonDownToPosedge),
+        .CLK_half(button_half),
+		.RST(RST),
+        
+        //--------for ram1
+		.memRead(memRead_a_EXMEM),
+		.memWrite(memWrite_a_EXMEM),
+		//physical connection
+		.ram1OE(ram1OE),
+		.ram1WE(ram1WE),
+		.ram1EN(ram1EN),
+		.ram1Addr(ram1Addr),
+		.ram1Data(ram1Data),
+        
+        .data_ready(data_ready),
+        .rdn(rdn),
+        .tbre(tbre),
+        .tsre(tsre),
+        .wrn(wrn),
+	
+		.ram1Address(ALUResult_a_EXMEM),
+		.dataIn(data_a_EXMEM),
+		
+		//output
+		.dataOut(data_a_MemController),
+        
+        
+        //--------for ram2
+        .ram2Address(PCValue),
+        .instruction(instruction_a_IM),
+        
+     
+        .RAM2OE(ram2OE),
+        .RAM2WE(ram2WE),
+        .RAM2EN(ram2EN),
+        .RAM2ADDR(ram2Addr),
+        .RAM2DATA(ram2Data)
 	);
     
 	//modules in MEM/WB stage
