@@ -4,22 +4,22 @@ module MemoryController(
     input CLK,
     input RST,
     input [15:0]address,
-	 input [15:0]dataIn,
+	input [15:0]dataIn,
     
     input [1:0] memRead,
-	 input [1:0] memWrite,
+	input [1:0] memWrite,
         
     output reg [15:0] dataOut,
     
     //this actually control the real memory
     output reg ram1OE,
-	 output reg ram1WE,
-	 output reg ram1EN,
-	 output [17:0]ram1Addr,
-	 inout [15:0]ram1Data,
+	output reg ram1WE,
+	output reg ram1EN,
+	output [17:0]ram1Addr,
+	inout [15:0]ram1Data,
     
     //input , output for the serial port
-	 input tbre,
+	input tbre,
     input tsre,
     input data_ready,
     output reg rdn,
@@ -58,7 +58,7 @@ begin
     end
     else begin
         case(CLK)  //in negedge of CLK
-        S0:
+        S1:
 			begin
 			case(address)
 				16'hBF00:
@@ -71,11 +71,11 @@ begin
 			wrn = 1'b1;
 			rdn = 1'b1;
 			ram1OE = 1'b1;
-         ram1WE = 1'b1;
+            ram1WE = 1'b1;
 			dataOut[15:0] = ram1Data[15:0];
-         end
+            end
         
-        S1:
+        S0:
 		  begin
             if(read)begin
 				case(address)

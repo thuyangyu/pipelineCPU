@@ -222,7 +222,7 @@ module PipelineCPU(
 			button_half <= ~button_half;
             
     //this is the real CPU CLK sent into all the module
-    //here the defination is: 
+    //here the defination of the CPU_CLK_double is: 
     //2'b11:buttonDownToPosedge
     //2'b10:CLK12
     //2'b01:CLK25
@@ -463,7 +463,7 @@ module PipelineCPU(
 	
 	MemoryController mc(//this is the instruction memory
         //input
-		.CLK(CPU_CLK_double),
+		.CLK(CPU_CLK),
 		.RST(RST),
         
 		//memory control signal
