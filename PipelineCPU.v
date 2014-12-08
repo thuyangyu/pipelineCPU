@@ -69,7 +69,9 @@ module PipelineCPU(
 	wire [1:0] ALUSrc2_a_Decoder;
 	wire [1:0] regDst_a_Decoder;
 	wire branch_a_Decoder;
+
     wire branch_b_IDEX;
+
 	wire [1:0] readSpecReg_a_Decoder;
 	wire [3:0] imSrcSelect;
 	
@@ -329,8 +331,10 @@ module PipelineCPU(
 	
 	assign memWrite_b_IDEX = (jump || addBubble || PCSrc) ? 2'b0 : memWrite_a_Decoder;
 	assign regWrite_b_IDEX = (jump || addBubble || PCSrc) ? 1'b0 : regWrite_a_Decoder;
+
 	assign jump_b_IDEX = ( addBubble || PCSrc) ? 1'b0: jump_a_Decoder;
     assign branch_b_IDEX = (jump || addBubble || PCSrc) ? 1'b0 : branch_a_Decoder;
+
 	//Registers
 	Registers registers(
 		.CLK(buttonDownToPosedge),
