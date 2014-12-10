@@ -2,6 +2,7 @@
 module EX_MEM(
 		input CLK,
 		input RST,
+		input freeze,
 		//input
 		input [1:0] writeSpecRegIn,
 		input memtoRegIn,
@@ -34,34 +35,38 @@ module EX_MEM(
 	always @ (posedge CLK, negedge RST)
 		if(!RST)
 		begin
-			writeSpecRegOut <= 2'b0;
-			memtoRegOut <= 1'b0;
-			regWriteOut <= 1'b0;
-			memReadOut <= 2'b0;
-			memWriteOut <= 2'b0;
-			branchOut <= 1'b0;
-			PCOut <= 16'b0;
-			
-			ALUResultOut <= 16'b0;
-			zerobitOut <= 1'b0;
-			dataOut <= 16'b0;
-			registerToWriteId <= 3'b0;
-		
+			if(freeze == 1'b0)
+			begin
+				writeSpecRegOut <= 2'b0;
+				memtoRegOut <= 1'b0;
+				regWriteOut <= 1'b0;
+				memReadOut <= 2'b0;
+				memWriteOut <= 2'b0;
+				branchOut <= 1'b0;
+				PCOut <= 16'b0;
+				
+				ALUResultOut <= 16'b0;
+				zerobitOut <= 1'b0;
+				dataOut <= 16'b0;
+				registerToWriteId <= 3'b0;
+			end
 		end
 		else
 		begin
-			writeSpecRegOut <= writeSpecRegIn;
-			memtoRegOut <= memtoRegIn;
-			regWriteOut <= regWriteIn;
-			memReadOut <= memReadIn;
-			memWriteOut <= memWriteIn;
-			branchOut <= branchIn;
-			PCOut <= PCIn;
-			
-			ALUResultOut <= ALUResultIn;
-			zerobitOut <= zerobitIn;
-			dataOut <= dataIn;
-			registerToWriteId <= registerToWriteIdIn;
-		
+			if(freeze == 1'b0)
+			begin
+				writeSpecRegOut <= writeSpecRegIn;
+				memtoRegOut <= memtoRegIn;
+				regWriteOut <= regWriteIn;
+				memReadOut <= memReadIn;
+				memWriteOut <= memWriteIn;
+				branchOut <= branchIn;
+				PCOut <= PCIn;
+				
+				ALUResultOut <= ALUResultIn;
+				zerobitOut <= zerobitIn;
+				dataOut <= dataIn;
+				registerToWriteId <= registerToWriteIdIn;
+			end
 		end
 	endmodule

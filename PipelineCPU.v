@@ -31,7 +31,10 @@ module PipelineCPU(
     input button,
     
     //for SW control 
-    input [5:0] SW
+    input [5:0] SW,
+	 
+	 //for freeze
+	 output LED
     
 );
 	//wires before PC
@@ -69,9 +72,7 @@ module PipelineCPU(
 	wire [1:0] ALUSrc2_a_Decoder;
 	wire [1:0] regDst_a_Decoder;
 	wire branch_a_Decoder;
-
     wire branch_b_IDEX;
-
 	wire [1:0] readSpecReg_a_Decoder;
 	wire [3:0] imSrcSelect;
 	
@@ -159,7 +160,9 @@ module PipelineCPU(
     wire [175:0] allRegistersDataLine;
     
     
-
+	reg prefreeze;
+    wire freeze;
+	assign LED = freeze;
 	//************************************* start attachment
     
     // deal with the frequency division,added code
@@ -289,6 +292,7 @@ module PipelineCPU(
 	IF_ID if_id(
 		.CLK(button_half),
 		.RST(RST),
+		.freeze(freeze),
 		.PCIn(PC_b_IFID), 									//input
 		.instructionIn(instruction_b_IFID),      //input
 		.PCOut(PC_a_IFID),			   				   //output
@@ -331,14 +335,13 @@ module PipelineCPU(
 	
 	assign memWrite_b_IDEX = (jump || addBubble || PCSrc) ? 2'b0 : memWrite_a_Decoder;
 	assign regWrite_b_IDEX = (jump || addBubble || PCSrc) ? 1'b0 : regWrite_a_Decoder;
-
 	assign jump_b_IDEX = ( addBubble || PCSrc) ? 1'b0: jump_a_Decoder;
     assign branch_b_IDEX = (jump || addBubble || PCSrc) ? 1'b0 : branch_a_Decoder;
-
 	//Registers
 	Registers registers(
 		.CLK(buttonDownToPosedge),
       .CLK_half(button_half),
+	  .freeze(freeze),
 		.regWrite(regWrite_a_MEMWB),   //RegWrite == 1 express write, == 0 express read;
 		.writeSpecReg(writeSpecReg_a_MEMWB),
 		.readSpecReg(readSpecReg_a_Decoder),
@@ -367,6 +370,7 @@ module PipelineCPU(
 		.CLK(button_half),
 		.RST(RST),
 		.PCIn(PC_a_IFID), 					//input
+		.freeze(freeze),
 		.inData1(outData1_a_Registers),    //input
 		.inData2(outData2_a_Registers),
 		.inRx(instruction_a_IFID[10:8]),
@@ -445,6 +449,7 @@ module PipelineCPU(
 	EX_MEM ex_mem(
 		.CLK(button_half),
 		.RST(RST),
+		.freeze(freeze),
 		//input
 		.writeSpecRegIn(writeSpecReg_a_IDEX),
 		.memtoRegIn(memToReg_a_IDEX),
@@ -510,6 +515,7 @@ module PipelineCPU(
         //input
 		.CLK(buttonDownToPosedge),
         .CLK_half(button_half),
+		.freeze(freeze),
 		.RST(RST),
         
         //--------for ram1
@@ -552,6 +558,7 @@ module PipelineCPU(
 	MEM_WB mem_wb(
 		.CLK(button_half),
 		.RST(RST),
+		.freeze(freeze),
 		//input
 		.writeSpecRegIn(writeSpecReg_a_EXMEM),
 		.memtoRegIn(memToReg_a_EXMEM),
@@ -591,10 +598,21 @@ module PipelineCPU(
 	assign next_PC = PCWrite ? PCValue : (jump ? outData1Decided : (PCSrc ? PC_a_EXMEM : PCPlus));
 	always @ (posedge button_half, negedge RST)
 		if(!RST)
-			PC <= 16'b0;
+			begin
+			if(freeze == 1'b0)
+				PC <= 16'b0;
+			end
 		else
-			PC <= next_PC;
-        
+			begin
+			if(freeze == 1'b0)
+				PC <= next_PC;
+			end
+   //assign freeze = 1'b0;
+	assign freeze = ( (~prefreeze) && (memWrite_a_EXMEM[1:0] != 2'b0) && (ALUResult_a_EXMEM[15:14] == 2'b01) && (memRead_a_EXMEM[1:0] == 2'b0)) ? 1'b1 : 1'b0;
+	always @ (posedge button_half)
+	begin
+		prefreeze <= freeze;
+	end
 
 
 	

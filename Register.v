@@ -3,6 +3,7 @@
 module Registers (
 input CLK,
 input CLK_half,
+input freeze,
 input regWrite,   //RegWrite == 1 express write, but the read is always enabled
 input [1:0]writeSpecReg,
 input [1:0]readSpecReg,
@@ -26,30 +27,33 @@ assign allRegistersDataToShow[175:0] = {generalRegister[0][15:0],generalRegister
 
 always @ (negedge CLK_half) // we write the data into specific reg in the negedge
 begin
-    if(regWrite)
-    begin //only when it is 1, we write the value of the registers
-        case(writeSpecReg[1:0])
-            2'b00: //this is the normal situation
-            begin
-                generalRegister[R3[2:0]] <= inData3;
-            end
-
-            2'b01:
-            begin
-                registerSP <= inData3;
-            end
-
-            2'b10:
-            begin
-                registerIH <= inData3;
-            end
-
-            2'b11:
-            begin
-                registerT <= inData3;
-            end
-        endcase
-    end
+	if(freeze == 1'b0)
+	begin
+		if(regWrite)
+		begin //only when it is 1, we write the value of the registers
+			case(writeSpecReg[1:0])
+				2'b00: //this is the normal situation
+				begin
+					generalRegister[R3[2:0]] <= inData3;
+				end
+	
+				2'b01:
+				begin
+					registerSP <= inData3;
+				end
+	
+				2'b10:
+				begin
+					registerIH <= inData3;
+				end
+	
+				2'b11:
+				begin
+					registerT <= inData3;
+				end
+			endcase
+		end
+	end
 end
 
 //I change it to the assign combination logic

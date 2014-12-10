@@ -2,6 +2,7 @@
 module ID_EX (
 		input CLK,
 		input RST,
+		input freeze,
 		input [15:0] PCIn, 								//input
 		input [15:0] inData1,    						//input
 		input [15:0] inData2,
@@ -50,50 +51,56 @@ module ID_EX (
 	always @ (posedge CLK, negedge RST)
 	if(!RST)
 	begin
-		PCOut <= 16'b0;
-		outData1 <= 16'b0;
-		outData2 <= 16'b0;
-		outExtendedImmediate <= 16'b0;
-		outRx <= 3'b0;
-		outRy <= 3'b0;
-		outRz <= 3'b0;
-		
-		writeSpecRegOut <= 2'b0;
-		memtoRegOut <= 1'b0;
-		regWriteOut <= 1'b0;
-		memReadOut <= 2'b0;
-		memWriteOut <= 2'b0;
-		jumpOut <= 1'b0;
-		RxToMemOut <= 1'b0;
-	    ALUOpOut <= 4'b0;
-	    ALUSrc1Out <= 2'b0;
-	    ALUSrc2Out <= 2'b0;
-	    regDstOut <= 2'b0;
-	    branchOut <= 1'b0;
-	    readSpecRegOut <= 2'b0;
+		if(freeze == 1'b0)
+		begin
+			PCOut <= 16'b0;
+			outData1 <= 16'b0;
+			outData2 <= 16'b0;
+			outExtendedImmediate <= 16'b0;
+			outRx <= 3'b0;
+			outRy <= 3'b0;
+			outRz <= 3'b0;
+			
+			writeSpecRegOut <= 2'b0;
+			memtoRegOut <= 1'b0;
+			regWriteOut <= 1'b0;
+			memReadOut <= 2'b0;
+			memWriteOut <= 2'b0;
+			jumpOut <= 1'b0;
+			RxToMemOut <= 1'b0;
+			ALUOpOut <= 4'b0;
+			ALUSrc1Out <= 2'b0;
+			ALUSrc2Out <= 2'b0;
+			regDstOut <= 2'b0;
+			branchOut <= 1'b0;
+			readSpecRegOut <= 2'b0;
+		end
 	end
 	else
 	begin
-		PCOut <= PCIn;
-		outData1 <= inData1;
-		outData2 <= inData2;
-		outExtendedImmediate <= inExtendedImmediate;
-		outRx <= inRx;
-		outRy <= inRy;
-		outRz <= inRz;
-		
-		writeSpecRegOut <= writeSpecRegIn;
-		memtoRegOut <= memtoRegIn;
-		regWriteOut <= regWriteIn;
-		memReadOut <= memReadIn;
-		memWriteOut <= memWriteIn;
-		jumpOut <= jumpIn;
-		RxToMemOut <= RxToMemIn;
-	    ALUOpOut <= ALUOpIn;
-	    ALUSrc1Out <= ALUSrc1In;
-	    ALUSrc2Out <= ALUSrc2In;
-	    regDstOut <= regDstIn;
-	    branchOut <= branchIn;
-	    readSpecRegOut <= readSpecRegIn;
+		if(freeze == 1'b0)
+		begin
+			PCOut <= PCIn;
+			outData1 <= inData1;
+			outData2 <= inData2;
+			outExtendedImmediate <= inExtendedImmediate;
+			outRx <= inRx;
+			outRy <= inRy;
+			outRz <= inRz;
+			
+			writeSpecRegOut <= writeSpecRegIn;
+			memtoRegOut <= memtoRegIn;
+			regWriteOut <= regWriteIn;
+			memReadOut <= memReadIn;
+			memWriteOut <= memWriteIn;
+			jumpOut <= jumpIn;
+			RxToMemOut <= RxToMemIn;
+			ALUOpOut <= ALUOpIn;
+			ALUSrc1Out <= ALUSrc1In;
+			ALUSrc2Out <= ALUSrc2In;
+			regDstOut <= regDstIn;
+			branchOut <= branchIn;
+			readSpecRegOut <= readSpecRegIn;
+		end
 	end
 endmodule
