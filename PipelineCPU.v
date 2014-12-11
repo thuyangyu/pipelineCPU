@@ -253,7 +253,7 @@ module PipelineCPU(
    
  
     //this is the display module, I place it at the beginning
-    GraphicCard gc(
+    /*GraphicCard gc(
       .clk(CLKCounter[0]),//this should be a really quick CLK even using single step, should always be clk25
       .rst(RST),
       .registerVGA(allRegistersDataLine),
@@ -270,6 +270,18 @@ module PipelineCPU(
       .r(r_topLevelOutForVGA),   //output for physical
       .g(g_topLevelOutForVGA),   //output for physical
       .b(b_topLevelOutForVGA)    //output for physical
+    );*/
+    
+     VGA vga(
+		.clk(CLK), 
+        .rst(RST),
+		.hs(hs_topLevelOutForVGA), 
+        .vs(vs_topLevelOutForVGA),
+		.r(r_topLevelOutForVGA), 
+        .g(g_topLevelOutForVGA), 
+        .b(b_topLevelOutForVGA),
+		.instruction(instruction_a_IM)
+
     );
 	
 	//modules in PC stage
