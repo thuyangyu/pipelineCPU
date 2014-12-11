@@ -100,3 +100,9 @@ NET "SW[3]" LOC = V4;
 NET "SW[2]" LOC = U8;
 NET "SW[1]" LOC = R7;
 NET "SW[0]" LOC = T7;
+
+NET "PS2_CLK" LOC = U6;
+NET "PS2_DAT" LOC = V6;
+NET "LED[0]" LOC = D10;
+NET "LED[1]" LOC = E10;
+NET "LED[2]" LOC = A11;

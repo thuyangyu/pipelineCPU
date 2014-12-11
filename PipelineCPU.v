@@ -33,8 +33,12 @@ module PipelineCPU(
     //for SW control 
     input [5:0] SW,
 	 
-	 //for freeze
-	 output LED
+	 //for output keyboard state
+	 output [2:0]LED,
+	 
+	 //for the ps2 keyboard
+	 inout PS2_CLK,
+	 inout PS2_DAT
     
 );
 	//wires before PC
@@ -162,7 +166,9 @@ module PipelineCPU(
     
 	reg prefreeze;
     wire freeze;
-	assign LED = freeze;
+	//assign LED = freeze;
+	//this is the keyborad state
+	wire[2:0] keyBoardState;
 	//************************************* start attachment
     
     // deal with the frequency division,added code
@@ -212,20 +218,12 @@ module PipelineCPU(
     //2'b010:CLK12
     //2'b001:CLK25
     //2'b000:CLK
-    wire CPU_CLK_wire_1;
-    wire CPU_CLK_wire_2;
-    wire CPU_CLK_wire_3;
-    wire CPU_CLK_wire_4;
-    wire CPU_CLK_wire_5;
-    wire CPU_CLK_wire_6;
-    wire CPU_CLK_double = SW[5] ? CPU_CLK_wire_3: CPU_CLK_wire_4;
-    assign CPU_CLK_wire_4 = SW[4] ? CPU_CLK_wire_1:CPU_CLK_wire_2;
-    assign CPU_CLK_wire_1 = SW[3] ? (SW[2]? CLKCounter[15]: CLKCounter[21]) : (SW[2]? CLKCounter[24]: CLKCounter[19]);
-    assign CPU_CLK_wire_2 = SW[3] ? (SW[2]? button: CLKCounter[1]) : (SW[2]? CLKCounter[0]: CLK);
+    wire highFre;
+    wire lowFre;
+    wire CPU_CLK_double = keyBoardState[2] ? highFre : lowFre;
+    assign highFre = keyBoardState[0] ? CLKCounter[0]: CLK;
+    assign lowFre = keyBoardState[1] ? (keyBoardState[0] ? CLKCounter[24]: CLKCounter[5]):(keyBoardState[0] ? CLKCounter[15]: button);
     
-    assign CPU_CLK_wire_3 = SW[4] ? CPU_CLK_wire_5:CPU_CLK_wire_6;
-    assign CPU_CLK_wire_5 = SW[3] ? (SW[2]? CLKCounter[2]: CLKCounter[3]) : (SW[2]? CLKCounter[5]: CLKCounter[6]);
-    assign CPU_CLK_wire_6 = SW[3] ? (SW[2]? CLKCounter[8]: CLKCounter[9]) : (SW[2]? CLKCounter[11]: CLKCounter[14]);
 	
 	//button get reverse, press the button is posedge
 	wire buttonDownToPosedge;
@@ -241,6 +239,17 @@ module PipelineCPU(
     //-------------------------------------------------------
 	//-----------------------begin the modules---------------------
     //-------------------------------------------------------
+	 
+	 //for the ps2 keyboard
+	 KeyboardTop kt(
+		.CLK(CLK),//this is the 50MHz clk
+		.RST(RST),
+		.state(keyBoardState),
+		.PS2_CLK(PS2_CLK),
+		.PS2_DAT(PS2_DAT)
+	);
+	
+	assign LED[2:0] = keyBoardState[2:0];
    
  
     //this is the display module, I place it at the beginning
