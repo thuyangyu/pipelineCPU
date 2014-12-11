@@ -1,27 +1,28 @@
-this is 302 group implementation of the THU-MIPS CPU
+
+This is 302 group implementation of the THU-MIPS CPU
 ========================
+This is the class project of the computer organization class in CS department in Tsinghua University
 
-
-group member
+Group member
 -----------------
 
 XIAO Di, YANG Yu, ZHANG Yiqing
 
 
-controllerDesignFiles
+ControllerDesignFiles
 --------------
-in this folder are the comtroller design file, sorry that I only have the wrriten version now
+In this folder are the controller design file, and also the data path design file 
 
-testingFiles
+TestingFiles
 ----------------
-- testing files for the **extended instructions** and ** data hazards**
+- Testing files for the **extended instructions** and **data hazards**
 - also the testing results screen shots
 
 VGA
 ------------------
-the code to render VGA, we can show the instructions in the right-bottom of the large screen
+The code to render VGA, we can show the instructions in the right-bottom of the large screen
 
-tools
+Tools
 -------------------
-some using tools and information shared among the whole group
+Some using tools and information shared among the whole group
 
